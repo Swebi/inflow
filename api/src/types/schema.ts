@@ -4,14 +4,10 @@ export interface ExtractedEvent {
   notes?: string;
 }
 
-export interface CreateUserData {
-  email: string;
-  name?: string;
-}
+import { Request } from "express";
 
-export interface UpdateUserData {
-  email?: string;
-  name?: string;
+export interface AuthRequest extends Request {
+  user?: { userId: string; email: string };
 }
 
 export interface CalendarEvent {

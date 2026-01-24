@@ -1,9 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
-import { userRouter } from "./routers/user.router";
+import { authRouter } from "./routers/auth.router";
 import { emailRouter } from "./routers/email.router";
 import { googleRouter } from "./routers/google.router";
 import { calendarRouter } from "./routers/calendar.router";
+import { errorHandler } from "./middlewares/errorHandler";
 import cors from "cors";
 
 dotenv.config();
@@ -15,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/users", userRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/email", emailRouter);
 app.use("/api/google", googleRouter);
 app.use("/api/calendar", calendarRouter);
@@ -24,18 +25,7 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Error handling middleware
-app.use(
-  (
-    err: Error,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    console.error(err.stack);
-    res.status(500).json({ error: "Something went wrong!" });
-  }
-);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
