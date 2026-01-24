@@ -1,20 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { browser } from "wxt/browser";
-import { Button } from "@/components/ui/button";
-
-interface EventResponse {
-  title: string;
-  date: string;
-  notes?: string;
-}
+import { Header } from "@/components/Header";
+import { DateTimeCard } from "@/components/DateTimeCard";
+import { EventsList } from "@/components/EventsList";
+import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { EventResponse } from "@/components/types";
 
 function App() {
   const [emailContent, setEmailContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [response, setResponse] = useState<EventResponse | null>(null);
+  const [events, setEvents] = useState<EventResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every minute
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const extractEmailFromPage = useCallback(async () => {
     console.log("[Sidepanel] Starting email extraction...");
@@ -39,15 +45,10 @@ function App() {
         throw new Error("Could not get active tab");
       }
 
-      // Check if we're on Gmail
-      if (!tab.url?.includes("mail.google.com")) {
-        console.warn("[Sidepanel] Not on Gmail, current URL:", tab.url);
-        setError("Please open a Gmail email to extract content");
-        setExtracting(false);
-        return;
-      }
 
-      console.log("[Sidepanel] On Gmail, sending extract message to content script...");
+      console.log(
+        "[Sidepanel] On Gmail, sending extract message to content script..."
+      );
 
       // Send message to content script to extract email
       const response = await browser.tabs.sendMessage(tab.id, {
@@ -118,6 +119,7 @@ function App() {
       );
       console.log("[Sidepanel] Successfully processed email:", result.data);
       setResponse(result.data);
+      setEvents((prev) => [result.data, ...prev]);
     } catch (err) {
       console.error("[Sidepanel] Error processing email:", err);
       if (axios.isAxiosError(err)) {
@@ -132,78 +134,29 @@ function App() {
     }
   };
 
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   return (
-    <div className="min-h-screen p-4 space-y-4 bg-white">
-      <h1 className="text-xl font-semibold text-center text-gray-800">
-        Email Event Extractor
-      </h1>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium text-gray-700">
-            Email Content
-          </label>
-          <Button
-            onClick={extractEmailFromPage}
-            disabled={extracting}
-            variant="outline"
-            size="sm"
-            className="text-xs"
-          >
-            {extracting ? "Extracting..." : "Refresh"}
-          </Button>
-        </div>
-        <textarea
-          value={emailContent}
-          onChange={(e) => setEmailContent(e.target.value)}
-          placeholder={
-            extracting
-              ? "Extracting email content..."
-              : "Email content will be extracted automatically from Gmail..."
-          }
-          className="w-full p-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={10}
-          readOnly={extracting}
-        />
-        {extracting && (
-          <p className="text-xs text-gray-500">
-            Extracting email from Gmail...
-          </p>
-        )}
-      </div>
-
-      <Button
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Header greeting={getGreeting()} userName="User" />
+      <DateTimeCard currentTime={currentTime} eventsCount={events.length} />
+      <EventsList
+        events={events}
+        error={error}
+        extracting={extracting}
+        showSuccess={!!response}
+      />
+      <FloatingActionButton
         onClick={handleSubmit}
         disabled={loading || extracting || !emailContent.trim()}
-        className="w-full"
-      >
-        {loading ? "Processing..." : "Extract Event"}
-      </Button>
-
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
-
-      {response && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-md space-y-2">
-          <h2 className="font-semibold text-gray-800">Extracted Event:</h2>
-          <div className="space-y-1 text-sm">
-            <p>
-              <span className="font-medium">Title:</span> {response.title}
-            </p>
-            <p>
-              <span className="font-medium">Date:</span> {response.date}
-            </p>
-            {response.notes && (
-              <p>
-                <span className="font-medium">Notes:</span> {response.notes}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+        loading={loading}
+      />
     </div>
   );
 }
