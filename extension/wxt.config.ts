@@ -8,8 +8,14 @@ export default defineConfig({
     plugins: [tailwindcss()],
   }),
   manifest: {
-    permissions: ["tabs", "activeTab"],
+    permissions: ["tabs", "activeTab", "sidePanel"],
     host_permissions: ["*://mail.google.com/*"],
+    action: {
+      default_title: "Open Inflow",
+    },
+    side_panel: {
+      default_path: "sidepanel.html",
+    },
   },
   webExt: {
     chromiumArgs: ["--user-data-dir=./.wxt/chrome-data"],

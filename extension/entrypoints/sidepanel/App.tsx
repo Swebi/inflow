@@ -17,44 +17,44 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   const extractEmailFromPage = useCallback(async () => {
-    console.log("[Popup] Starting email extraction...");
+    console.log("[Sidepanel] Starting email extraction...");
     setExtracting(true);
     setError(null);
 
     try {
       // Get the active tab
-      console.log("[Popup] Querying active tab...");
+      console.log("[Sidepanel] Querying active tab...");
       const [tab] = await browser.tabs.query({
         active: true,
         currentWindow: true,
       });
-      console.log("[Popup] Active tab:", {
+      console.log("[Sidepanel] Active tab:", {
         id: tab.id,
         url: tab.url,
         title: tab.title,
       });
 
       if (!tab.id) {
-        console.error("[Popup] No tab ID found");
+        console.error("[Sidepanel] No tab ID found");
         throw new Error("Could not get active tab");
       }
 
       // Check if we're on Gmail
       if (!tab.url?.includes("mail.google.com")) {
-        console.warn("[Popup] Not on Gmail, current URL:", tab.url);
+        console.warn("[Sidepanel] Not on Gmail, current URL:", tab.url);
         setError("Please open a Gmail email to extract content");
         setExtracting(false);
         return;
       }
 
-      console.log("[Popup] On Gmail, sending extract message to content script...");
+      console.log("[Sidepanel] On Gmail, sending extract message to content script...");
 
       // Send message to content script to extract email
       const response = await browser.tabs.sendMessage(tab.id, {
         action: "extractEmail",
       });
 
-      console.log("[Popup] Received response from content script:", {
+      console.log("[Sidepanel] Received response from content script:", {
         success: response?.success,
         hasContent: !!response?.content,
         contentLength: response?.content?.length,
@@ -63,18 +63,18 @@ function App() {
 
       if (response?.success && response.content) {
         console.log(
-          "[Popup] Successfully extracted email content, length:",
+          "[Sidepanel] Successfully extracted email content, length:",
           response.content.length
         );
         setEmailContent(response.content);
       } else {
-        console.error("[Popup] Extraction failed:", response?.error);
+        console.error("[Sidepanel] Extraction failed:", response?.error);
         throw new Error(response?.error || "Failed to extract email content");
       }
     } catch (err) {
-      console.error("[Popup] Error during extraction:", err);
+      console.error("[Sidepanel] Error during extraction:", err);
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      console.error("[Popup] Error details:", {
+      console.error("[Sidepanel] Error details:", {
         message: errorMessage,
         name: err instanceof Error ? err.name : "Unknown",
         stack: err instanceof Error ? err.stack : undefined,
@@ -84,25 +84,25 @@ function App() {
           "Failed to extract email from page. Make sure you're viewing an email in Gmail."
       );
     } finally {
-      console.log("[Popup] Extraction process completed");
+      console.log("[Sidepanel] Extraction process completed");
       setExtracting(false);
     }
   }, []);
 
-  // Extract email content when popup opens
+  // Extract email content when sidepanel opens
   useEffect(() => {
     extractEmailFromPage();
   }, [extractEmailFromPage]);
 
   const handleSubmit = async () => {
     if (!emailContent.trim()) {
-      console.warn("[Popup] Submit attempted with empty email content");
+      console.warn("[Sidepanel] Submit attempted with empty email content");
       setError("Please enter email content");
       return;
     }
 
     console.log(
-      "[Popup] Submitting email for processing, content length:",
+      "[Sidepanel] Submitting email for processing, content length:",
       emailContent.length
     );
     setLoading(true);
@@ -116,10 +116,10 @@ function App() {
           emailContent,
         }
       );
-      console.log("[Popup] Successfully processed email:", result.data);
+      console.log("[Sidepanel] Successfully processed email:", result.data);
       setResponse(result.data);
     } catch (err) {
-      console.error("[Popup] Error processing email:", err);
+      console.error("[Sidepanel] Error processing email:", err);
       if (axios.isAxiosError(err)) {
         setError(
           err.response?.data?.error || err.message || "Failed to process email"
@@ -133,7 +133,7 @@ function App() {
   };
 
   return (
-    <div className="w-96 p-4 space-y-4 bg-white rounded-md shadow-md">
+    <div className="min-h-screen p-4 space-y-4 bg-white">
       <h1 className="text-xl font-semibold text-center text-gray-800">
         Email Event Extractor
       </h1>
@@ -162,7 +162,7 @@ function App() {
               : "Email content will be extracted automatically from Gmail..."
           }
           className="w-full p-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          rows={8}
+          rows={10}
           readOnly={extracting}
         />
         {extracting && (

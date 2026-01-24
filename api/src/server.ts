@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import { userRouter } from "./routers/user.router";
 import { emailRouter } from "./routers/email.router";
+import { googleRouter } from "./routers/google.router";
+import { calendarRouter } from "./routers/calendar.router";
 import cors from "cors";
 
 dotenv.config();
@@ -15,6 +17,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/users", userRouter);
 app.use("/api/email", emailRouter);
+app.use("/api/google", googleRouter);
+app.use("/api/calendar", calendarRouter);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
