@@ -10,13 +10,13 @@ export function DateTimeCard({
   const displayDate = selectedDate || currentTime;
   const isToday = displayDate.toDateString() === currentTime.toDateString();
 
-  const formatDate = () => {
-    // Format: "Jan 25 2026" (no comma)
+  const formatMonthDay = () => {
     const month = displayDate.toLocaleDateString("en-US", { month: "short" });
     const day = displayDate.getDate();
-    const year = displayDate.getFullYear();
-    return `${month} ${day} ${year}`;
+    return `${month} ${day}`;
   };
+
+  const formatYear = () => displayDate.getFullYear();
 
   const formatTime = () => {
     return displayDate.toLocaleTimeString("en-US", {
@@ -97,8 +97,13 @@ export function DateTimeCard({
 
         {/* Middle row: Date + Time */}
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-3xl font-bold text-slate-900">{formatDate()}</p>
+          <div className="flex flex-col">
+            <p className="text-3xl font-bold text-slate-900 leading-tight">
+              {formatMonthDay()}
+            </p>
+            <p className="text-3xl font-bold text-slate-900 leading-tight">
+              {formatYear()}
+            </p>
           </div>
           <div className="border-l border-slate-200 pl-6">
             <p className="text-4xl font-bold text-slate-900">

@@ -194,14 +194,16 @@ export function EventEditDrawer({
                 <button
                   key={i}
                   type="button"
-                  className="flex w-full flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/50 active:bg-blue-100/50"
+                  className="flex w-full flex-col gap-1 rounded-2xl border border-slate-100 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow active:bg-slate-50"
                   onClick={() => handlePick(ev)}
                 >
-                  <p className="font-medium text-slate-900">{ev.title}</p>
-                  <p className="text-sm text-slate-600">
+                  <p className="font-semibold text-base text-slate-900">
+                    {ev.title}
+                  </p>
+                  <p className="text-sm text-slate-500">
                     {ev.date}
                     {ev.kind && (
-                      <span className="ml-1.5 text-slate-500">
+                      <span className="ml-1.5">
                         · {KIND_LABELS[ev.kind]}
                       </span>
                     )}
@@ -350,7 +352,7 @@ export function EventEditDrawer({
               <Button
                 type="submit"
                 form="event-edit-form"
-                className="w-full bg-blue-500 text-white hover:bg-blue-600 disabled:bg-slate-300 disabled:text-slate-500"
+                className="w-full bg-slate-800 text-white hover:bg-slate-900 disabled:bg-slate-300 disabled:text-slate-500"
                 disabled={saving || !form.title.trim()}
               >
                 {saving ? "Saving…" : "Save"}
