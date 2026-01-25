@@ -64,6 +64,24 @@ function setupGmailNavigationDetection(): void {
           
           debounceTimer = window.setTimeout(() => {
             console.log("[Content Script] Navigation complete, ready for extraction");
+            
+            // Check if we're viewing an email (not just inbox/list view)
+            // Wait a bit more for DOM to update after navigation
+            setTimeout(() => {
+              if (isViewingEmail()) {
+                console.log("[Content Script] 📧 Email view detected, notifying sidepanel...");
+                // Send message to runtime to notify sidepanel of email change
+                browser.runtime.sendMessage({
+                  action: "emailChanged",
+                  url: currentUrl,
+                }).catch((error) => {
+                  // It's okay if no listener is available (sidepanel might not be open)
+                  console.log("[Content Script] No listener for emailChanged message (sidepanel may be closed)");
+                });
+              } else {
+                console.log("[Content Script] Not viewing an email, skipping notification");
+              }
+            }, 300);
           }, 500);
         }
       } catch (error) {

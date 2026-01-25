@@ -102,6 +102,77 @@ function App() {
     extractEmailFromPage();
   }, [extractEmailFromPage]);
 
+  // Listen for email navigation changes from content script
+  useEffect(() => {
+    const handleMessage = (message: any) => {
+      if (message?.action === "emailChanged") {
+        console.log("[Sidepanel] Email changed detected, re-extracting...");
+        extractEmailFromPage();
+      }
+    };
+
+    browser.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      browser.runtime.onMessage.removeListener(handleMessage);
+    };
+  }, [extractEmailFromPage]);
+
+  // Listen for tab changes (when user switches to a different Gmail tab)
+  useEffect(() => {
+    const handleTabUpdate = async (
+      tabId: number,
+      changeInfo: any,
+      tab: any
+    ) => {
+      // Only react to URL changes (navigation) or when tab becomes active
+      if (changeInfo.url || changeInfo.status === "complete") {
+        // Check if this is a Gmail tab
+        if (tab.url?.includes("mail.google.com")) {
+          console.log("[Sidepanel] Gmail tab updated, checking if we should re-extract...");
+          // Get the current active tab to see if this is the one we're viewing
+          const [activeTab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+          });
+          
+          // Only re-extract if this updated tab is the active one
+          if (activeTab.id === tabId) {
+            console.log("[Sidepanel] Active Gmail tab updated, re-extracting email...");
+            extractEmailFromPage();
+          }
+        }
+      }
+    };
+
+    browser.tabs.onUpdated.addListener(handleTabUpdate);
+
+    return () => {
+      browser.tabs.onUpdated.removeListener(handleTabUpdate);
+    };
+  }, [extractEmailFromPage]);
+
+  // Listen for tab activation (when user switches tabs)
+  useEffect(() => {
+    const handleTabActivated = async (activeInfo: any) => {
+      console.log("[Sidepanel] Tab activated:", activeInfo.tabId);
+      // Get the tab details
+      const tab = await browser.tabs.get(activeInfo.tabId);
+      
+      // If it's a Gmail tab, re-extract
+      if (tab.url?.includes("mail.google.com")) {
+        console.log("[Sidepanel] Switched to Gmail tab, re-extracting email...");
+        extractEmailFromPage();
+      }
+    };
+
+    browser.tabs.onActivated.addListener(handleTabActivated);
+
+    return () => {
+      browser.tabs.onActivated.removeListener(handleTabActivated);
+    };
+  }, [extractEmailFromPage]);
+
   const handleSubmit = async () => {
     if (!emailContent.trim()) {
       console.warn("[Sidepanel] Submit attempted with empty email content");

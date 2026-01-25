@@ -68,11 +68,6 @@ export function EventsList({
         </div>
       )} */}
 
-      {extracting && (
-        <p className="text-sm text-slate-400 mb-3">
-          Extracting email from Gmail...
-        </p>
-      )}
 
       {filteredEvents.length === 0 && !extracting && (
         <p className="text-sm text-slate-400 mb-3 px-1">
