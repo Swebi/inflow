@@ -6,6 +6,14 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(err.stack);
+  console.error("Global error handler triggered:", {
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body,
+    query: req.query,
+    errorType: err.constructor.name,
+  });
   res.status(500).json({ error: "Something went wrong!" });
 };

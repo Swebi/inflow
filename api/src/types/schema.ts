@@ -1,6 +1,8 @@
 export interface ExtractedEvent {
   title: string;
   date: string;
+  startTime?: string | null;
+  endTime?: string | null;
   notes?: string;
 }
 
