@@ -67,6 +67,8 @@ export interface EventsListProps {
 export interface DateTimeCardProps {
   currentTime: Date;
   eventsCount?: number;
+  selectedDate?: Date;
+  onDateChange?: (date: Date) => void;
 }
 
 export interface FloatingActionButtonProps {

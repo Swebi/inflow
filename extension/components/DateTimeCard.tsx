@@ -1,20 +1,25 @@
 import { DateTimeCardProps } from "@/types/schema";
 
-export function DateTimeCard({ currentTime, eventsCount = 0 }: DateTimeCardProps) {
-  const formatMonth = () => {
-    return currentTime.toLocaleDateString("en-US", { month: "long" });
-  };
+export function DateTimeCard({
+  currentTime,
+  eventsCount = 0,
+  selectedDate,
+  onDateChange,
+}: DateTimeCardProps) {
+  // Use selectedDate if provided, otherwise use currentTime
+  const displayDate = selectedDate || currentTime;
+  const isToday = displayDate.toDateString() === currentTime.toDateString();
 
   const formatDate = () => {
-    const day = String(currentTime.getDate()).padStart(2, "0");
-    const month = String(currentTime.getMonth() + 1).padStart(2, "0");
-    const year = String(currentTime.getFullYear()).slice(-2);
-    // Using thin space (U+2009) for subtle spacing around separators
-    return `${day}\u2009|\u2009${month}\u2009|\u2009${year}`;
+    // Format: "Jan 25 2026" (no comma)
+    const month = displayDate.toLocaleDateString("en-US", { month: "short" });
+    const day = displayDate.getDate();
+    const year = displayDate.getFullYear();
+    return `${month} ${day} ${year}`;
   };
 
   const formatTime = () => {
-    return currentTime.toLocaleTimeString("en-US", {
+    return displayDate.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
@@ -22,18 +27,29 @@ export function DateTimeCard({ currentTime, eventsCount = 0 }: DateTimeCardProps
   };
 
   const formatDay = () => {
-    return currentTime.toLocaleDateString("en-US", { weekday: "long" });
+    return displayDate.toLocaleDateString("en-US", { weekday: "long" });
   };
 
-  // Get upcoming days for the row
+  // Get upcoming days with full date objects for navigation
   const getUpcomingDays = () => {
     const days = [];
     for (let i = 1; i <= 4; i++) {
       const date = new Date(currentTime);
       date.setDate(date.getDate() + i);
-      days.push(date.getDate());
+      days.push({
+        day: date.getDate(),
+        date: date,
+      });
     }
     return days;
+  };
+
+  const handleDateClick = (date: Date) => {
+    onDateChange?.(date);
+  };
+
+  const handleTodayClick = () => {
+    onDateChange?.(currentTime);
   };
 
   const timeParts = formatTime().split(" ");
@@ -44,24 +60,45 @@ export function DateTimeCard({ currentTime, eventsCount = 0 }: DateTimeCardProps
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
         {/* Top row: Today + upcoming days */}
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+          <button
+            onClick={handleTodayClick}
+            className={`text-sm font-medium px-3 py-1 rounded-full transition-colors ${
+              isToday
+                ? "bg-slate-800 text-white"
+                : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
+            }`}
+            aria-label="Go to today"
+          >
             Today
-          </span>
-          {upcomingDays.map((day, index) => (
-            <span
-              key={index}
-              className="w-8 h-8 flex items-center justify-center text-sm text-slate-400 rounded-full"
-            >
-              {day}
-            </span>
-          ))}
+          </button>
+          {upcomingDays.map((dayObj, index) => {
+            const isSelected =
+              selectedDate &&
+              dayObj.date.toDateString() === selectedDate.toDateString();
+            return (
+              <button
+                key={index}
+                onClick={() => handleDateClick(dayObj.date)}
+                className={`w-8 h-8 flex items-center justify-center text-sm rounded-full transition-colors ${
+                  isSelected
+                    ? "bg-slate-800 text-white"
+                    : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
+                }`}
+                aria-label={`Go to ${dayObj.date.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                })}`}
+              >
+                {dayObj.day}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Middle row: Month/Date + Time */}
+        {/* Middle row: Date + Time */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-3xl font-bold text-blue-500">{formatMonth()}</p>
-            <p className="text-lg text-slate-500">{formatDate()}</p>
+            <p className="text-3xl font-bold text-slate-900">{formatDate()}</p>
           </div>
           <div className="border-l border-slate-200 pl-6">
             <p className="text-4xl font-bold text-slate-900">

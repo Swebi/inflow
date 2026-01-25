@@ -3,6 +3,14 @@ import { FilterType, EventsListProps } from "@/types/schema";
 import { EventCard } from "./EventCard";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
+import { Mail } from "lucide-react";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 
 export function EventsList({
   events,
@@ -70,15 +78,25 @@ export function EventsList({
 
 
       {filteredEvents.length === 0 && !extracting && (
-        <p className="text-sm text-slate-400 mb-3 px-1">
-          {events.length === 0
-            ? "Scan an email to extract events and add them here."
-            : activeFilter === "calendar"
-            ? "No calendar events."
-            : activeFilter === "tasks"
-            ? "No tasks."
-            : "Scan an email to extract events and add them here."}
-        </p>
+        <Empty className="border-0 py-6">
+          <EmptyHeader className="gap-0">
+            <EmptyMedia variant="icon" className="size-16 rounded-full bg-slate-100 mb-">
+              <Mail className="size-8 text-slate-600" />
+            </EmptyMedia>
+            <EmptyTitle className="text-xl font-semibold text-slate-900 mb-2">
+              No actions yet
+            </EmptyTitle>
+            <EmptyDescription className="text-slate-500">
+              {events.length === 0
+                ? "Scan an email to extract events and add them here."
+                : activeFilter === "calendar"
+                ? "No calendar events."
+                : activeFilter === "tasks"
+                ? "No tasks."
+                : "Scan an email to extract events and add them here."}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
       {/* Events List */}

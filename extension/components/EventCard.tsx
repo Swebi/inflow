@@ -25,8 +25,10 @@ export function EventCard({ event, variant }: EventCardProps) {
 
   return (
     <div
-      className={`rounded-2xl p-4 ${
-        isLight ? "bg-blue-100 border border-blue-200" : "bg-blue-500"
+      className={`rounded-2xl p-4 transition-shadow ${
+        isLight
+          ? "bg-white shadow-sm border border-slate-100 hover:shadow"
+          : "bg-slate-800 border border-slate-700"
       }`}
     >
       <div className="flex flex-col">
@@ -38,7 +40,7 @@ export function EventCard({ event, variant }: EventCardProps) {
           >
             {event.title}
           </h3>
-          <div className="shrink-0">
+          <div className="shrink-0 opacity-100">
             <img
               src={sourceIcon}
               alt={
@@ -53,7 +55,7 @@ export function EventCard({ event, variant }: EventCardProps) {
         <div className="flex items-center justify-between mt-1">
           <p
             className={`text-sm ${
-              isLight ? "text-slate-600" : "text-blue-100"
+              isLight ? "text-slate-500" : "text-slate-300"
             }`}
           >
             {event.date}
@@ -61,7 +63,7 @@ export function EventCard({ event, variant }: EventCardProps) {
           {event.time && (
             <p
               className={`text-sm ${
-                isLight ? "text-slate-600" : "text-blue-100"
+                isLight ? "text-slate-500" : "text-slate-300"
               }`}
             >
               {formatTimeDisplay(event.time)}

@@ -19,6 +19,7 @@ function App() {
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scannedEvents, setScannedEvents] = useState<
     ScannedEventResponse[] | null
@@ -233,7 +234,12 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header greeting={getGreeting()} userName="Suhayb" />
-      <DateTimeCard currentTime={currentTime} eventsCount={events.length} />
+      <DateTimeCard
+        currentTime={currentTime}
+        eventsCount={events.length}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+      />
       <EventsList
         events={events}
         error={error}
