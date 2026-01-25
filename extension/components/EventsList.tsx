@@ -32,8 +32,8 @@ export function EventsList({
     "text-sm font-medium px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5";
 
   return (
-    <div className="flex-1 px-5 pb-24">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="flex-1 px-4 pb-24">
+      <div className="flex items-center gap-2 mb-4">
         <button
           type="button"
           onClick={() => setActiveFilter("recents")}
@@ -107,13 +107,13 @@ export function EventsList({
       </div>
 
       {/* Success Message */}
-      {showSuccess && (
+      {/* {showSuccess && (
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
           <p className="text-sm text-blue-700 font-medium">
             Event added successfully!
           </p>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

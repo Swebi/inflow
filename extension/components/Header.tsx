@@ -7,7 +7,7 @@ interface HeaderProps {
 
 export function Header({ greeting, userName = "User" }: HeaderProps) {
   return (
-    <header className="px-5 pt-6 pb-3 flex items-center justify-between">
+    <header className="px-5 pt-6 pb-4 flex items-center justify-between">
       <h1 className="text-2xl font-semibold text-slate-900">
         {greeting}
         <br />
