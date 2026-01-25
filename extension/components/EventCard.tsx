@@ -15,6 +15,14 @@ function formatTimeTo12Hour(time24: string): string {
   return `${hour12}:${minutes} ${ampm}`;
 }
 
+function formatTimeDisplay(time: string): string {
+  if (time.includes(" - ")) {
+    const [start, end] = time.split(" - ");
+    return `${formatTimeTo12Hour(start)} - ${formatTimeTo12Hour(end)}`;
+  }
+  return formatTimeTo12Hour(time);
+}
+
 export function EventCard({ event, variant }: EventCardProps) {
   const isLight = variant === "light";
   const sourceIcon =
@@ -61,7 +69,7 @@ export function EventCard({ event, variant }: EventCardProps) {
                 isLight ? "text-slate-600" : "text-blue-100"
               }`}
             >
-              {formatTimeTo12Hour(event.time)}
+              {formatTimeDisplay(event.time)}
             </p>
           )}
         </div>

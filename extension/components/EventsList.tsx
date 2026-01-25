@@ -84,7 +84,7 @@ export function EventsList({
       )}
 
       {filteredEvents.length === 0 && !extracting && (
-        <p className="text-sm text-slate-400 mb-3">
+        <p className="text-sm text-slate-400 mb-3 px-1">
           {events.length === 0
             ? "Scan an email to extract events and add them here."
             : activeFilter === "calendar"

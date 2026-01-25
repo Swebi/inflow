@@ -5,16 +5,18 @@ import { Header } from "@/components/Header";
 import { DateTimeCard } from "@/components/DateTimeCard";
 import { EventsList } from "@/components/EventsList";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { EventResponse } from "@/components/types";
+import { EventEditDrawer } from "@/components/EventEditDrawer";
+import { EventResponse, ScannedEventResponse } from "@/components/types";
 
 function App() {
   const [emailContent, setEmailContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [extracting, setExtracting] = useState(false);
-  const [response, setResponse] = useState<EventResponse | null>(null);
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scannedEvent, setScannedEvent] = useState<ScannedEventResponse | null>(null);
 
   // Update time every minute
   useEffect(() => {
@@ -108,18 +110,18 @@ function App() {
     );
     setLoading(true);
     setError(null);
-    setResponse(null);
+    setScannedEvent(null);
 
     try {
-      const result = await axios.post<EventResponse>(
+      const result = await axios.post<ScannedEventResponse>(
         "http://localhost:8000/api/email/process",
         {
           emailContent,
         }
       );
       console.log("[Sidepanel] Successfully processed email:", result.data);
-      setResponse(result.data);
-      setEvents((prev) => [result.data, ...prev]);
+      setScannedEvent(result.data);
+      setDrawerOpen(true);
     } catch (err) {
       console.error("[Sidepanel] Error processing email:", err);
       if (axios.isAxiosError(err)) {
@@ -134,6 +136,12 @@ function App() {
     }
   };
 
+  const handleDrawerSave = (event: EventResponse) => {
+    setEvents((prev) => [event, ...prev]);
+    setDrawerOpen(false);
+    setScannedEvent(null);
+  };
+
   // Get greeting based on time of day
   const getGreeting = () => {
     const hour = currentTime.getHours();
@@ -144,13 +152,22 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Header greeting={getGreeting()} userName="User" />
+      <Header greeting={getGreeting()} userName="Suhayb" />
       <DateTimeCard currentTime={currentTime} eventsCount={events.length} />
       <EventsList
         events={events}
         error={error}
         extracting={extracting}
-        showSuccess={!!response}
+        showSuccess={false}
+      />
+      <EventEditDrawer
+        open={drawerOpen}
+        onOpenChange={(open) => {
+          setDrawerOpen(open);
+          if (!open) setScannedEvent(null);
+        }}
+        initialData={scannedEvent}
+        onSave={handleDrawerSave}
       />
       <FloatingActionButton
         onClick={handleSubmit}
