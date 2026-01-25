@@ -1,11 +1,6 @@
-import { EventResponse } from "./types";
+import { EventResponse, EventCardProps } from "@/types/schema";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
-
-interface EventCardProps {
-  event: EventResponse;
-  variant: "light" | "dark";
-}
 
 function formatTimeTo12Hour(time24: string): string {
   const [hours, minutes] = time24.split(":");

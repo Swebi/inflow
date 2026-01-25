@@ -1,9 +1,16 @@
+export type ExtractedEventKind =
+  | "registration_deadline"
+  | "event"
+  | "deadline"
+  | "other";
+
 export interface ExtractedEvent {
   title: string;
   date: string;
   startTime?: string | null;
   endTime?: string | null;
   notes?: string;
+  kind?: ExtractedEventKind;
 }
 
 import { Request } from "express";

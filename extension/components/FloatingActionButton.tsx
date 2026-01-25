@@ -1,8 +1,4 @@
-interface FloatingActionButtonProps {
-  onClick: () => void;
-  disabled: boolean;
-  loading: boolean;
-}
+import { FloatingActionButtonProps } from "@/types/schema";
 
 export function FloatingActionButton({
   onClick,

@@ -1,9 +1,5 @@
 import Avatar from "boring-avatars";
-
-interface HeaderProps {
-  greeting: string;
-  userName?: string;
-}
+import { HeaderProps } from "@/types/schema";
 
 export function Header({ greeting, userName = "User" }: HeaderProps) {
   return (

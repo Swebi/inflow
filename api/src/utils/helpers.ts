@@ -9,5 +9,5 @@ export function cleanupMarkdown(text: string): string {
   } else if (cleaned.startsWith("```")) {
     cleaned = cleaned.replace(/```\n?/g, "");
   }
-  return cleaned;
+  return cleaned.trim();
 }

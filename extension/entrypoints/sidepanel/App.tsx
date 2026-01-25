@@ -6,7 +6,11 @@ import { DateTimeCard } from "@/components/DateTimeCard";
 import { EventsList } from "@/components/EventsList";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { EventEditDrawer } from "@/components/EventEditDrawer";
-import { EventResponse, ScannedEventResponse } from "@/components/types";
+import {
+  EventResponse,
+  ProcessEmailResponse,
+  ScannedEventResponse,
+} from "@/types/schema";
 
 function App() {
   const [emailContent, setEmailContent] = useState("");
@@ -16,7 +20,9 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [scannedEvent, setScannedEvent] = useState<ScannedEventResponse | null>(null);
+  const [scannedEvents, setScannedEvents] = useState<
+    ScannedEventResponse[] | null
+  >(null);
 
   // Update time every minute
   useEffect(() => {
@@ -46,7 +52,6 @@ function App() {
         console.error("[Sidepanel] No tab ID found");
         throw new Error("Could not get active tab");
       }
-
 
       console.log(
         "[Sidepanel] On Gmail, sending extract message to content script..."
@@ -110,17 +115,21 @@ function App() {
     );
     setLoading(true);
     setError(null);
-    setScannedEvent(null);
+    setScannedEvents(null);
 
     try {
-      const result = await axios.post<ScannedEventResponse>(
+      const result = await axios.post<ProcessEmailResponse>(
         "http://localhost:8000/api/email/process",
         {
           emailContent,
         }
       );
-      console.log("[Sidepanel] Successfully processed email:", result.data);
-      setScannedEvent(result.data);
+      const { events } = result.data;
+      console.log("[Sidepanel] Successfully processed email:", {
+        count: events.length,
+        events,
+      });
+      setScannedEvents(events);
       setDrawerOpen(true);
     } catch (err) {
       console.error("[Sidepanel] Error processing email:", err);
@@ -139,7 +148,7 @@ function App() {
   const handleDrawerSave = (event: EventResponse) => {
     setEvents((prev) => [event, ...prev]);
     setDrawerOpen(false);
-    setScannedEvent(null);
+    setScannedEvents(null);
   };
 
   // Get greeting based on time of day
@@ -164,9 +173,9 @@ function App() {
         open={drawerOpen}
         onOpenChange={(open) => {
           setDrawerOpen(open);
-          if (!open) setScannedEvent(null);
+          if (!open) setScannedEvents(null);
         }}
-        initialData={scannedEvent}
+        initialEvents={scannedEvents}
         onSave={handleDrawerSave}
       />
       <FloatingActionButton

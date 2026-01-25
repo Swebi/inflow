@@ -1,7 +1,4 @@
-interface DateTimeCardProps {
-  currentTime: Date;
-  eventsCount?: number;
-}
+import { DateTimeCardProps } from "@/types/schema";
 
 export function DateTimeCard({ currentTime, eventsCount = 0 }: DateTimeCardProps) {
   const formatMonth = () => {

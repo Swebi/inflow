@@ -38,3 +38,44 @@ export interface EventFormData {
   endDate: Date;
   endTime: string;
 }
+
+// Component prop types
+export type DrawerScreen = "picker" | "form";
+
+export interface EventEditDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Parsed actions from email – drawer shows picker (2+) or form (1) */
+  initialEvents: ScannedEventResponse[] | null;
+  onSave: (event: EventResponse) => void;
+}
+
+export interface EventCardProps {
+  event: EventResponse;
+  variant: "light" | "dark";
+}
+
+export type FilterType = "recents" | "calendar" | "tasks";
+
+export interface EventsListProps {
+  events: EventResponse[];
+  error: string | null;
+  extracting: boolean;
+  showSuccess: boolean;
+}
+
+export interface DateTimeCardProps {
+  currentTime: Date;
+  eventsCount?: number;
+}
+
+export interface FloatingActionButtonProps {
+  onClick: () => void;
+  disabled: boolean;
+  loading: boolean;
+}
+
+export interface HeaderProps {
+  greeting: string;
+  userName?: string;
+}

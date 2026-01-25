@@ -1,17 +1,8 @@
 import { useState } from "react";
-import { EventResponse } from "./types";
+import { FilterType, EventsListProps } from "@/types/schema";
 import { EventCard } from "./EventCard";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
-
-type FilterType = "recents" | "calendar" | "tasks";
-
-interface EventsListProps {
-  events: EventResponse[];
-  error: string | null;
-  extracting: boolean;
-  showSuccess: boolean;
-}
 
 export function EventsList({
   events,
@@ -25,8 +16,8 @@ export function EventsList({
     activeFilter === "recents"
       ? events
       : activeFilter === "calendar"
-        ? events.filter((e) => e.source === "google-calendar")
-        : events.filter((e) => e.source === "google-tasks");
+      ? events.filter((e) => e.source === "google-calendar")
+      : events.filter((e) => e.source === "google-tasks");
 
   const filterBtn =
     "text-sm font-medium px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5";
@@ -39,7 +30,7 @@ export function EventsList({
           onClick={() => setActiveFilter("recents")}
           className={`${filterBtn} ${
             activeFilter === "recents"
-              ? "bg-blue-100 text-slate-900"
+              ? "bg-slate-800 text-white"
               : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
           }`}
         >
@@ -50,7 +41,7 @@ export function EventsList({
           onClick={() => setActiveFilter("calendar")}
           className={`${filterBtn} ${
             activeFilter === "calendar"
-              ? "bg-blue-100 text-slate-900"
+              ? "bg-slate-800 text-white"
               : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
           }`}
         >
@@ -62,7 +53,7 @@ export function EventsList({
           onClick={() => setActiveFilter("tasks")}
           className={`${filterBtn} ${
             activeFilter === "tasks"
-              ? "bg-blue-100 text-slate-900"
+              ? "bg-slate-800 text-white"
               : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
           }`}
         >
@@ -88,21 +79,17 @@ export function EventsList({
           {events.length === 0
             ? "Scan an email to extract events and add them here."
             : activeFilter === "calendar"
-              ? "No calendar events."
-              : activeFilter === "tasks"
-                ? "No tasks."
-                : "Scan an email to extract events and add them here."}
+            ? "No calendar events."
+            : activeFilter === "tasks"
+            ? "No tasks."
+            : "Scan an email to extract events and add them here."}
         </p>
       )}
 
       {/* Events List */}
       <div className="space-y-3">
         {filteredEvents.map((event, index) => (
-          <EventCard
-            key={index}
-            event={event}
-            variant={index % 2 === 0 ? "light" : "dark"}
-          />
+          <EventCard key={index} event={event} variant="light" />
         ))}
       </div>
 
