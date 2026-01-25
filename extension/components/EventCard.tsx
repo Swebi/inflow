@@ -7,6 +7,14 @@ interface EventCardProps {
   variant: "light" | "dark";
 }
 
+function formatTimeTo12Hour(time24: string): string {
+  const [hours, minutes] = time24.split(":");
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minutes} ${ampm}`;
+}
+
 export function EventCard({ event, variant }: EventCardProps) {
   const isLight = variant === "light";
   const sourceIcon =
@@ -53,7 +61,7 @@ export function EventCard({ event, variant }: EventCardProps) {
                 isLight ? "text-slate-600" : "text-blue-100"
               }`}
             >
-              {event.time}
+              {formatTimeTo12Hour(event.time)}
             </p>
           )}
         </div>
