@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { calendarService } from "../services/calendar.service";
 
 export const calendarController = {
-  createEvent: async (req: Request, res: Response) => {
+  createEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const accessToken = req.headers.authorization?.replace("Bearer ", "");
 
@@ -43,15 +43,11 @@ export const calendarController = {
 
       res.status(201).json(event);
     } catch (error) {
-      console.error("Error creating event:", error);
-      res.status(500).json({
-        error: "Failed to create calendar event",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 
-  listEvents: async (req: Request, res: Response) => {
+  listEvents: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const accessToken = req.headers.authorization?.replace("Bearer ", "");
 
@@ -72,15 +68,11 @@ export const calendarController = {
 
       res.json(events);
     } catch (error) {
-      console.error("Error listing events:", error);
-      res.status(500).json({
-        error: "Failed to list calendar events",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 
-  getEvent: async (req: Request, res: Response) => {
+  getEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const accessToken = req.headers.authorization?.replace("Bearer ", "");
 
@@ -101,15 +93,11 @@ export const calendarController = {
       const event = await calendarService.getEvent(accessToken, eventId);
       res.json(event);
     } catch (error) {
-      console.error("Error getting event:", error);
-      res.status(500).json({
-        error: "Failed to get calendar event",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 
-  updateEvent: async (req: Request, res: Response) => {
+  updateEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const accessToken = req.headers.authorization?.replace("Bearer ", "");
 
@@ -134,15 +122,11 @@ export const calendarController = {
       );
       res.json(event);
     } catch (error) {
-      console.error("Error updating event:", error);
-      res.status(500).json({
-        error: "Failed to update calendar event",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 
-  deleteEvent: async (req: Request, res: Response) => {
+  deleteEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const accessToken = req.headers.authorization?.replace("Bearer ", "");
 
@@ -163,11 +147,7 @@ export const calendarController = {
       await calendarService.deleteEvent(accessToken, eventId);
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting event:", error);
-      res.status(500).json({
-        error: "Failed to delete calendar event",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 };

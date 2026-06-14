@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { emailService } from "../services/email.service";
 
 export const emailController = {
-  processEmail: async (req: Request, res: Response) => {
+  processEmail: async (req: Request, res: Response, next: NextFunction) => {
     const requestId = Date.now().toString();
     console.log(`[${requestId}] Email processing request received`);
 
@@ -49,15 +49,7 @@ export const emailController = {
 
       return res.json({ events });
     } catch (error) {
-      console.error(`[${requestId}] Error processing email:`, {
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        errorType: error?.constructor?.name,
-      });
-      return res.status(500).json({
-        error: "Failed to process email",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 };

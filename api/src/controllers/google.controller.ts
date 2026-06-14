@@ -1,21 +1,17 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { googleService } from "../services/google.service";
 
 export const googleController = {
-  getAuthUrl: async (req: Request, res: Response) => {
+  getAuthUrl: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authUrl = googleService.getAuthUrl();
       res.json({ authUrl });
     } catch (error) {
-      console.error("Error generating auth URL:", error);
-      res.status(500).json({
-        error: "Failed to generate authorization URL",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 
-  handleCallback: async (req: Request, res: Response) => {
+  handleCallback: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { code } = req.body;
 
@@ -28,15 +24,11 @@ export const googleController = {
       const tokens = await googleService.exchangeCodeForTokens(code);
       res.json(tokens);
     } catch (error) {
-      console.error("Error exchanging code for tokens:", error);
-      res.status(500).json({
-        error: "Failed to exchange authorization code",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 
-  getUserInfo: async (req: Request, res: Response) => {
+  getUserInfo: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const accessToken = req.headers.authorization?.replace("Bearer ", "");
 
@@ -49,11 +41,7 @@ export const googleController = {
       const userInfo = await googleService.getUserInfo(accessToken);
       res.json(userInfo);
     } catch (error) {
-      console.error("Error getting user info:", error);
-      res.status(500).json({
-        error: "Failed to get user info",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      next(error);
     }
   },
 };

@@ -6,14 +6,15 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("Global error handler triggered:", {
-    error: err.message,
+  console.error("Error:", {
+    message: err.message,
     stack: err.stack,
     path: req.path,
     method: req.method,
-    body: req.body,
-    query: req.query,
-    errorType: err.constructor.name,
   });
-  res.status(500).json({ error: "Something went wrong!" });
+  
+  res.status(500).json({ 
+    error: "Internal server error",
+    message: err.message 
+  });
 };
