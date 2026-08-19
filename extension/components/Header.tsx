@@ -3,11 +3,7 @@ import { LogOut } from "lucide-react";
 import { HeaderProps } from "@/types/schema";
 import { Button } from "@/components/ui/button";
 
-interface HeaderWithLogoutProps extends HeaderProps {
-  onLogout?: () => void;
-}
-
-export function Header({ greeting, userName = "User", onLogout }: HeaderWithLogoutProps) {
+export function Header({ greeting, userName = "User", onLogout }: HeaderProps) {
   return (
     <header className="px-5 pt-6 pb-4 flex items-center justify-between">
       <h1 className="text-2xl font-light text-slate-900">

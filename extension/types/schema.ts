@@ -62,6 +62,7 @@ export interface EventsListProps {
   error: string | null;
   extracting: boolean;
   showSuccess: boolean;
+  selectedDate?: Date;
 }
 
 export interface DateTimeCardProps {
@@ -80,4 +81,5 @@ export interface FloatingActionButtonProps {
 export interface HeaderProps {
   greeting: string;
   userName?: string;
+  onLogout?: () => void;
 }

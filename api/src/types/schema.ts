@@ -56,7 +56,7 @@ export interface GenerateEventParams {
 }
 
 export interface CreateEventData {
-  accessToken: string;
+  userId: string;
   summary: string;
   startTime: string;
   endTime: string;
@@ -68,7 +68,7 @@ export interface CreateEventData {
 }
 
 export interface ListEventsData {
-  accessToken: string;
+  userId: string;
   timeMin?: string;
   timeMax?: string;
   maxResults?: number;

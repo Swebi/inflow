@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, MoreHorizontal } from "lucide-react";
+import { format } from "date-fns";
+import { ArrowLeft } from "lucide-react";
+import axios from "axios";
 
 import {
   EventFormData,
@@ -12,6 +14,7 @@ import {
   EventEditDrawerProps,
 } from "@/types/schema";
 import { scannedToFormData, formDataToEvent } from "@/utils/event";
+import { useAuth } from "@/contexts/AuthContext";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
 import { Button } from "./ui/button";
@@ -34,6 +37,8 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 import { cn } from "@/lib/utils";
+
+const API_BASE_URL = "http://localhost:8000/api";
 
 const KIND_LABELS: Record<NonNullable<ScannedEventResponse["kind"]>, string> = {
   registration_deadline: "Registration deadline",
@@ -65,11 +70,13 @@ export function EventEditDrawer({
   initialEvents,
   onSave,
 }: EventEditDrawerProps) {
+  const { token } = useAuth();
   const [screen, setScreen] = useState<DrawerScreen>("picker");
   const [selectedEvent, setSelectedEvent] =
     useState<ScannedEventResponse | null>(null);
   const [form, setForm] = useState<EventFormData>(defaultFormData);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const hasMultiple = (initialEvents?.length ?? 0) > 1;
   const cameFromPicker = hasMultiple && screen === "form";
@@ -79,6 +86,7 @@ export function EventEditDrawer({
       setScreen("picker");
       setSelectedEvent(null);
       setForm(defaultFormData);
+      setSaveError(null);
       return;
     }
     if (!initialEvents || initialEvents.length === 0) return;
@@ -105,6 +113,7 @@ export function EventEditDrawer({
   };
 
   const handleBack = () => {
+    setSaveError(null);
     if (cameFromPicker) {
       setScreen("picker");
       setSelectedEvent(null);
@@ -135,12 +144,60 @@ export function EventEditDrawer({
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!form.title.trim()) return;
     setSaving(true);
-    const event = formDataToEvent(form);
-    onSave(event);
-    setSaving(false);
-    onOpenChange(false);
+    setSaveError(null);
+
+    try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      if (form.source === "google-calendar") {
+        const dateStr = format(form.startDate, "yyyy-MM-dd");
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        await axios.post(
+          `${API_BASE_URL}/calendar/events`,
+          {
+            summary: form.title.trim(),
+            startTime: form.startTime || "09:00",
+            endTime: form.endTime || "10:00",
+            date: dateStr,
+            description: form.description.trim() || undefined,
+            timeZone,
+          },
+          { headers }
+        );
+      } else {
+        const dueDateStr = format(form.dueDate, "yyyy-MM-dd");
+        await axios.post(
+          `${API_BASE_URL}/tasks/tasks`,
+          {
+            title: form.title.trim(),
+            notes: form.description.trim() || undefined,
+            dueDate: dueDateStr,
+            dueTime: form.dueTime || undefined,
+          },
+          { headers }
+        );
+      }
+
+      const event: EventResponse = formDataToEvent(form);
+      onSave(event);
+      onOpenChange(false);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const msg = err.response?.data?.error || err.message;
+        setSaveError(
+          msg === "Google account not connected"
+            ? "Connect your Google account first (see banner above)."
+            : msg || "Failed to save"
+        );
+      } else {
+        setSaveError("An unexpected error occurred");
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -153,38 +210,20 @@ export function EventEditDrawer({
       >
         <DrawerHeader className="flex flex-row items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-3">
           <div className="flex items-center gap-2">
-            {screen === "picker" ? (
-              <button
-                type="button"
-                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-blue-50 hover:text-slate-900"
-                aria-label="Close"
-                onClick={handlePickerClose}
-              >
-                <ArrowLeft className="size-5" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-blue-50 hover:text-slate-900"
-                aria-label="Back"
-                onClick={handleBack}
-              >
-                <ArrowLeft className="size-5" />
-              </button>
-            )}
+            <button
+              type="button"
+              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-blue-50 hover:text-slate-900"
+              aria-label={screen === "picker" ? "Close" : "Back"}
+              onClick={screen === "picker" ? handlePickerClose : handleBack}
+            >
+              <ArrowLeft className="size-5" />
+            </button>
             <DrawerTitle className="text-lg font-semibold text-slate-900">
               {screen === "picker"
                 ? `We found ${initialEvents?.length ?? 0} actions`
                 : "Add task"}
             </DrawerTitle>
           </div>
-          {/* <button
-            type="button"
-            className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-blue-50 hover:text-slate-900"
-            aria-label="More options"
-          >
-            <MoreHorizontal className="size-5" />
-          </button> */}
         </DrawerHeader>
 
         {screen === "picker" ? (
@@ -344,6 +383,12 @@ export function EventEditDrawer({
                       </div>
                     </div>
                   </>
+                )}
+
+                {saveError && (
+                  <p className="text-sm text-red-600 rounded-lg bg-red-50 px-3 py-2">
+                    {saveError}
+                  </p>
                 )}
               </form>
             </div>

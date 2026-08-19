@@ -3,7 +3,7 @@ import { FilterType, EventsListProps } from "@/types/schema";
 import { EventCard } from "./EventCard";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
-import { Mail } from "lucide-react";
+import { AlertCircle, Mail } from "lucide-react";
 import {
   Empty,
   EmptyHeader,
@@ -17,6 +17,7 @@ export function EventsList({
   error,
   extracting,
   showSuccess,
+  selectedDate,
 }: EventsListProps) {
   const [activeFilter, setActiveFilter] = useState<FilterType>("recents");
 
@@ -29,6 +30,15 @@ export function EventsList({
 
   const filterBtn =
     "text-sm font-medium px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5";
+
+  const emptyDescription = () => {
+    if (selectedDate && events.length === 0) {
+      return "No events on this date yet.";
+    }
+    if (activeFilter === "calendar") return "No calendar events.";
+    if (activeFilter === "tasks") return "No tasks.";
+    return "Scan an email to extract events and add them here.";
+  };
 
   return (
     <div className="flex-1 px-4 pb-24">
@@ -70,50 +80,42 @@ export function EventsList({
         </button>
       </div>
 
-      {/* {error && (
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl mb-3">
-          <p className="text-sm text-blue-700">{error}</p>
+      {error && !extracting && (
+        <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl mb-4">
+          <AlertCircle className="size-4 text-amber-600 mt-0.5 shrink-0" />
+          <p className="text-sm text-amber-800">{error}</p>
         </div>
-      )} */}
-
+      )}
 
       {filteredEvents.length === 0 && !extracting && (
         <Empty className="border-0 py-6">
           <EmptyHeader className="gap-0">
-            <EmptyMedia variant="icon" className="size-16 rounded-full bg-slate-100 mb-">
+            <EmptyMedia variant="icon" className="size-16 rounded-full bg-slate-100 mb-2">
               <Mail className="size-8 text-slate-600" />
             </EmptyMedia>
             <EmptyTitle className="text-xl font-semibold text-slate-900 mb-2">
               No actions yet
             </EmptyTitle>
             <EmptyDescription className="text-slate-500">
-              {events.length === 0
-                ? "Scan an email to extract events and add them here."
-                : activeFilter === "calendar"
-                ? "No calendar events."
-                : activeFilter === "tasks"
-                ? "No tasks."
-                : "Scan an email to extract events and add them here."}
+              {emptyDescription()}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}
 
-      {/* Events List */}
       <div className="space-y-3">
         {filteredEvents.map((event, index) => (
           <EventCard key={index} event={event} variant="light" />
         ))}
       </div>
 
-      {/* Success Message */}
-      {/* {showSuccess && (
+      {showSuccess && (
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
           <p className="text-sm text-blue-700 font-medium">
             Event added successfully!
           </p>
         </div>
-      )} */}
+      )}
     </div>
   );
 }

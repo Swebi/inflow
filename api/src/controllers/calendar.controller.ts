@@ -1,36 +1,29 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { calendarService } from "../services/calendar.service";
+import { AuthRequest } from "../types/schema";
+
+function handleGoogleError(error: unknown, res: Response, next: NextFunction): void {
+  if (error instanceof Error && error.message === "Google account not connected") {
+    res.status(403).json({ error: "Google account not connected" });
+    return;
+  }
+  next(error);
+}
 
 export const calendarController = {
-  createEvent: async (req: Request, res: Response, next: NextFunction) => {
+  createEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const accessToken = req.headers.authorization?.replace("Bearer ", "");
+      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
 
-      if (!accessToken) {
-        return res.status(401).json({
-          error: "Access token is required",
-        });
-      }
-
-      const {
-        summary,
-        startTime,
-        endTime,
-        date,
-        description,
-        location,
-        color,
-        timeZone,
-      } = req.body;
+      const { summary, startTime, endTime, date, description, location, color, timeZone } = req.body;
 
       if (!summary || !startTime || !endTime || !date) {
-        return res.status(400).json({
-          error: "summary, startTime, endTime, and date are required",
-        });
+        res.status(400).json({ error: "summary, startTime, endTime, and date are required" });
+        return;
       }
 
       const event = await calendarService.createEvent({
-        accessToken,
+        userId: req.user.userId,
         summary,
         startTime,
         endTime,
@@ -43,24 +36,18 @@ export const calendarController = {
 
       res.status(201).json(event);
     } catch (error) {
-      next(error);
+      handleGoogleError(error, res, next);
     }
   },
 
-  listEvents: async (req: Request, res: Response, next: NextFunction) => {
+  listEvents: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const accessToken = req.headers.authorization?.replace("Bearer ", "");
-
-      if (!accessToken) {
-        return res.status(401).json({
-          error: "Access token is required",
-        });
-      }
+      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
 
       const { timeMin, timeMax, maxResults } = req.query;
 
       const events = await calendarService.listEvents({
-        accessToken,
+        userId: req.user.userId,
         timeMin: timeMin as string | undefined,
         timeMax: timeMax as string | undefined,
         maxResults: maxResults ? parseInt(maxResults as string) : undefined,
@@ -68,86 +55,49 @@ export const calendarController = {
 
       res.json(events);
     } catch (error) {
-      next(error);
+      handleGoogleError(error, res, next);
     }
   },
 
-  getEvent: async (req: Request, res: Response, next: NextFunction) => {
+  getEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const accessToken = req.headers.authorization?.replace("Bearer ", "");
-
-      if (!accessToken) {
-        return res.status(401).json({
-          error: "Access token is required",
-        });
-      }
+      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
 
       const { eventId } = req.params;
+      if (!eventId) { res.status(400).json({ error: "Event ID is required" }); return; }
 
-      if (!eventId) {
-        return res.status(400).json({
-          error: "Event ID is required",
-        });
-      }
-
-      const event = await calendarService.getEvent(accessToken, eventId);
+      const event = await calendarService.getEvent(req.user.userId, eventId);
       res.json(event);
     } catch (error) {
-      next(error);
+      handleGoogleError(error, res, next);
     }
   },
 
-  updateEvent: async (req: Request, res: Response, next: NextFunction) => {
+  updateEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const accessToken = req.headers.authorization?.replace("Bearer ", "");
-
-      if (!accessToken) {
-        return res.status(401).json({
-          error: "Access token is required",
-        });
-      }
+      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
 
       const { eventId } = req.params;
+      if (!eventId) { res.status(400).json({ error: "Event ID is required" }); return; }
 
-      if (!eventId) {
-        return res.status(400).json({
-          error: "Event ID is required",
-        });
-      }
-
-      const event = await calendarService.updateEvent(
-        accessToken,
-        eventId,
-        req.body
-      );
+      const event = await calendarService.updateEvent(req.user.userId, eventId, req.body);
       res.json(event);
     } catch (error) {
-      next(error);
+      handleGoogleError(error, res, next);
     }
   },
 
-  deleteEvent: async (req: Request, res: Response, next: NextFunction) => {
+  deleteEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const accessToken = req.headers.authorization?.replace("Bearer ", "");
-
-      if (!accessToken) {
-        return res.status(401).json({
-          error: "Access token is required",
-        });
-      }
+      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
 
       const { eventId } = req.params;
+      if (!eventId) { res.status(400).json({ error: "Event ID is required" }); return; }
 
-      if (!eventId) {
-        return res.status(400).json({
-          error: "Event ID is required",
-        });
-      }
-
-      await calendarService.deleteEvent(accessToken, eventId);
+      await calendarService.deleteEvent(req.user.userId, eventId);
       res.status(204).send();
     } catch (error) {
-      next(error);
+      handleGoogleError(error, res, next);
     }
   },
 };

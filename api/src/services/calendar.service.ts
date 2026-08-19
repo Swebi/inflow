@@ -1,10 +1,13 @@
 import { getCalendarClient } from "../utils/google";
 import { generateEvent } from "../utils/calendar";
 import { CalendarEvent, CreateEventData, ListEventsData } from "../types/schema";
+import { googleService } from "./google.service";
 
 export const calendarService = {
   createEvent: async (data: CreateEventData) => {
-    const calendarClient = getCalendarClient(data.accessToken);
+    const { accessToken, refreshToken, expiryDate } =
+      await googleService.getValidTokens(data.userId);
+    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
     const event = generateEvent({
       summary: data.summary,
@@ -26,7 +29,9 @@ export const calendarService = {
   },
 
   listEvents: async (data: ListEventsData) => {
-    const calendarClient = getCalendarClient(data.accessToken);
+    const { accessToken, refreshToken, expiryDate } =
+      await googleService.getValidTokens(data.userId);
+    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
     const response = await calendarClient.events.list({
       calendarId: "primary",
@@ -40,8 +45,10 @@ export const calendarService = {
     return response.data.items || [];
   },
 
-  getEvent: async (accessToken: string, eventId: string) => {
-    const calendarClient = getCalendarClient(accessToken);
+  getEvent: async (userId: string, eventId: string) => {
+    const { accessToken, refreshToken, expiryDate } =
+      await googleService.getValidTokens(userId);
+    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
     const response = await calendarClient.events.get({
       calendarId: "primary",
@@ -52,11 +59,13 @@ export const calendarService = {
   },
 
   updateEvent: async (
-    accessToken: string,
+    userId: string,
     eventId: string,
     eventData: Partial<CalendarEvent>
   ) => {
-    const calendarClient = getCalendarClient(accessToken);
+    const { accessToken, refreshToken, expiryDate } =
+      await googleService.getValidTokens(userId);
+    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
     const response = await calendarClient.events.patch({
       calendarId: "primary",
@@ -67,8 +76,10 @@ export const calendarService = {
     return response.data;
   },
 
-  deleteEvent: async (accessToken: string, eventId: string) => {
-    const calendarClient = getCalendarClient(accessToken);
+  deleteEvent: async (userId: string, eventId: string) => {
+    const { accessToken, refreshToken, expiryDate } =
+      await googleService.getValidTokens(userId);
+    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
     await calendarClient.events.delete({
       calendarId: "primary",

@@ -8,7 +8,7 @@ import { CalendarEvent, GenerateEventParams } from "../types/schema";
 export function createEventDateTime(
   time: string,
   date: string,
-  timeZone: string = DEFAULT_TIMEZONE
+  _timeZone: string = DEFAULT_TIMEZONE
 ): string {
   return `${date}T${time}:00`;
 }
