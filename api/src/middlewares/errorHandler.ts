@@ -10,7 +10,7 @@ export const errorHandler = (
   req: Request,
   res: Response,
   _next: NextFunction
-): void => {
+) => {
   const statusCode = isAppError(err) ? err.statusCode : 500;
   const message = isAppError(err)
     ? err.message

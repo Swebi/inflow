@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { handleExtractEvents } from "../services/email.service";
 import { AppError } from "../types/schema";
 
-export const processEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const processEmail = async (req: Request, res: Response, next: NextFunction) => {
   const requestId = Date.now().toString();
   console.log(`[${requestId}] Email processing request received`);
 

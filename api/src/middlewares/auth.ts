@@ -2,7 +2,7 @@ import { Response, NextFunction } from "express";
 import { handleVerifyToken } from "../services/auth.service";
 import { AuthRequest, AppError } from "../types/schema";
 
-export const authMiddleware = (req: AuthRequest, _res: Response, next: NextFunction): void => {
+export const authMiddleware = (req: AuthRequest, _res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {

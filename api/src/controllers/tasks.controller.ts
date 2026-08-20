@@ -8,7 +8,7 @@ import {
 } from "../services/tasks.service";
 import { AuthRequest, AppError } from "../types/schema";
 
-export const createTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const createTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -36,7 +36,7 @@ export const createTask = async (req: AuthRequest, res: Response, next: NextFunc
   }
 };
 
-export const listTasks = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const listTasks = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -61,7 +61,7 @@ export const listTasks = async (req: AuthRequest, res: Response, next: NextFunct
   }
 };
 
-export const getTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const getTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -84,7 +84,7 @@ export const getTask = async (req: AuthRequest, res: Response, next: NextFunctio
   }
 };
 
-export const updateTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const updateTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -106,7 +106,7 @@ export const updateTask = async (req: AuthRequest, res: Response, next: NextFunc
   }
 };
 
-export const deleteTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const deleteTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;

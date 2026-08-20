@@ -8,7 +8,7 @@ import {
 } from "../services/calendar.service";
 import { AuthRequest, AppError } from "../types/schema";
 
-export const createEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const createEvent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -41,7 +41,7 @@ export const createEvent = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
-export const listEvents = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const listEvents = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -66,7 +66,7 @@ export const listEvents = async (req: AuthRequest, res: Response, next: NextFunc
   }
 };
 
-export const getEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const getEvent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -89,7 +89,7 @@ export const getEvent = async (req: AuthRequest, res: Response, next: NextFuncti
   }
 };
 
-export const updateEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const updateEvent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -111,7 +111,7 @@ export const updateEvent = async (req: AuthRequest, res: Response, next: NextFun
   }
 };
 
-export const deleteEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const deleteEvent = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;

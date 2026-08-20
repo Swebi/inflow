@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { handleRegister, handleLogin, handleGetMe } from "../services/auth.service";
 import { AuthRequest, AppError } from "../types/schema";
 
-export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password, name } = req.body;
     if (!email || !password) {
@@ -21,7 +21,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -40,7 +40,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   }
 };
 
-export const me = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const me = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;

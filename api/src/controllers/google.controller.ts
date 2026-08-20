@@ -8,7 +8,7 @@ import {
 } from "../services/google.service";
 import { AuthRequest, AppError } from "../types/schema";
 
-export const getAuthUrl = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const getAuthUrl = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -27,7 +27,7 @@ export const getAuthUrl = async (req: AuthRequest, res: Response, next: NextFunc
 };
 
 // Legacy POST endpoint kept for when a web frontend captures the code
-export const handleCallback = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const handleCallback = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { code } = req.body;
     if (!code || typeof code !== "string") {
@@ -47,7 +47,7 @@ export const handleCallback = async (req: Request, res: Response, next: NextFunc
 };
 
 // GET handler for the actual Google OAuth redirect
-export const handleOAuthCallback = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const handleOAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { code, state, error: oauthError } = req.query;
 
@@ -73,7 +73,7 @@ export const handleOAuthCallback = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const getStatus = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const getStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       throw { statusCode: 401, message: "Unauthorized" } as AppError;
@@ -91,7 +91,7 @@ export const getStatus = async (req: AuthRequest, res: Response, next: NextFunct
   }
 };
 
-export const getUserInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUserInfo = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const accessToken = req.headers.authorization?.replace("Bearer ", "");
     if (!accessToken) {
