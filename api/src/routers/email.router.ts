@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { emailController } from "../controllers/email.controller";
+import { processEmail } from "../controllers/email.controller";
 
 export const emailRouter = Router();
 
-emailRouter.post("/process", emailController.processEmail);
+emailRouter.post("/process", processEmail);

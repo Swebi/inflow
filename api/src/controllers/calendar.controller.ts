@@ -1,103 +1,134 @@
 import { Response, NextFunction } from "express";
-import { calendarService } from "../services/calendar.service";
-import { AuthRequest } from "../types/schema";
+import {
+  handleCreateEvent,
+  handleListEvents,
+  handleGetEvent,
+  handleUpdateEvent,
+  handleDeleteEvent,
+} from "../services/calendar.service";
+import { AuthRequest, AppError } from "../types/schema";
 
-function handleGoogleError(error: unknown, res: Response, next: NextFunction): void {
-  if (error instanceof Error && error.message === "Google account not connected") {
-    res.status(403).json({ error: "Google account not connected" });
-    return;
+export const createEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    const { summary, startTime, endTime, date, description, location, color, timeZone } = req.body;
+
+    if (!summary || !startTime || !endTime || !date) {
+      throw { statusCode: 400, message: "summary, startTime, endTime, and date are required" } as AppError;
+    }
+
+    await handleCreateEvent({
+      userId: req.user.userId,
+      summary,
+      startTime,
+      endTime,
+      date,
+      description,
+      location,
+      color,
+      timeZone,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Event created successfully",
+    });
+  } catch (error) {
+    next(error);
   }
-  next(error);
-}
+};
 
-export const calendarController = {
-  createEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-
-      const { summary, startTime, endTime, date, description, location, color, timeZone } = req.body;
-
-      if (!summary || !startTime || !endTime || !date) {
-        res.status(400).json({ error: "summary, startTime, endTime, and date are required" });
-        return;
-      }
-
-      const event = await calendarService.createEvent({
-        userId: req.user.userId,
-        summary,
-        startTime,
-        endTime,
-        date,
-        description,
-        location,
-        color,
-        timeZone,
-      });
-
-      res.status(201).json(event);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+export const listEvents = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
     }
-  },
 
-  listEvents: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    const { timeMin, timeMax, maxResults } = req.query;
 
-      const { timeMin, timeMax, maxResults } = req.query;
+    const data = await handleListEvents({
+      userId: req.user.userId,
+      timeMin: timeMin as string | undefined,
+      timeMax: timeMax as string | undefined,
+      maxResults: maxResults ? parseInt(maxResults as string) : undefined,
+    });
 
-      const events = await calendarService.listEvents({
-        userId: req.user.userId,
-        timeMin: timeMin as string | undefined,
-        timeMax: timeMax as string | undefined,
-        maxResults: maxResults ? parseInt(maxResults as string) : undefined,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Events fetched",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      res.json(events);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+export const getEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
     }
-  },
 
-  getEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-
-      const { eventId } = req.params;
-      if (!eventId) { res.status(400).json({ error: "Event ID is required" }); return; }
-
-      const event = await calendarService.getEvent(req.user.userId, eventId);
-      res.json(event);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+    const { eventId } = req.params;
+    if (!eventId) {
+      throw { statusCode: 400, message: "Event ID is required" } as AppError;
     }
-  },
 
-  updateEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    const data = await handleGetEvent(req.user.userId, eventId);
 
-      const { eventId } = req.params;
-      if (!eventId) { res.status(400).json({ error: "Event ID is required" }); return; }
+    res.status(200).json({
+      success: true,
+      message: "Event fetched",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      const event = await calendarService.updateEvent(req.user.userId, eventId, req.body);
-      res.json(event);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+export const updateEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
     }
-  },
 
-  deleteEvent: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-
-      const { eventId } = req.params;
-      if (!eventId) { res.status(400).json({ error: "Event ID is required" }); return; }
-
-      await calendarService.deleteEvent(req.user.userId, eventId);
-      res.status(204).send();
-    } catch (error) {
-      handleGoogleError(error, res, next);
+    const { eventId } = req.params;
+    if (!eventId) {
+      throw { statusCode: 400, message: "Event ID is required" } as AppError;
     }
-  },
+
+    await handleUpdateEvent(req.user.userId, eventId, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Event updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteEvent = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    const { eventId } = req.params;
+    if (!eventId) {
+      throw { statusCode: 400, message: "Event ID is required" } as AppError;
+    }
+
+    await handleDeleteEvent(req.user.userId, eventId);
+
+    res.status(200).json({
+      success: true,
+      message: "Event deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
 };

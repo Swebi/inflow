@@ -1,95 +1,129 @@
 import { Response, NextFunction } from "express";
-import { tasksService } from "../services/tasks.service";
-import { AuthRequest } from "../types/schema";
+import {
+  handleCreateTask,
+  handleListTasks,
+  handleGetTask,
+  handleUpdateTask,
+  handleDeleteTask,
+} from "../services/tasks.service";
+import { AuthRequest, AppError } from "../types/schema";
 
-function handleGoogleError(error: unknown, res: Response, next: NextFunction): void {
-  if (error instanceof Error && error.message === "Google account not connected") {
-    res.status(403).json({ error: "Google account not connected" });
-    return;
+export const createTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    const { title, notes, dueDate, dueTime } = req.body;
+    if (!title) {
+      throw { statusCode: 400, message: "title is required" } as AppError;
+    }
+
+    await handleCreateTask({
+      userId: req.user.userId,
+      title,
+      notes,
+      dueDate,
+      dueTime,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Task created successfully",
+    });
+  } catch (error) {
+    next(error);
   }
-  next(error);
-}
+};
 
-export const tasksController = {
-  createTask: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-
-      const { title, notes, dueDate, dueTime } = req.body;
-      if (!title) { res.status(400).json({ error: "title is required" }); return; }
-
-      const task = await tasksService.createTask({
-        userId: req.user.userId,
-        title,
-        notes,
-        dueDate,
-        dueTime,
-      });
-
-      res.status(201).json(task);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+export const listTasks = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
     }
-  },
 
-  listTasks: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    const { dueMin, dueMax, maxResults } = req.query;
 
-      const { dueMin, dueMax, maxResults } = req.query;
+    const data = await handleListTasks({
+      userId: req.user.userId,
+      dueMin: dueMin as string | undefined,
+      dueMax: dueMax as string | undefined,
+      maxResults: maxResults ? parseInt(maxResults as string) : undefined,
+    });
 
-      const tasks = await tasksService.listTasks({
-        userId: req.user.userId,
-        dueMin: dueMin as string | undefined,
-        dueMax: dueMax as string | undefined,
-        maxResults: maxResults ? parseInt(maxResults as string) : undefined,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Tasks fetched",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      res.json(tasks);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+export const getTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
     }
-  },
 
-  getTask: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-
-      const { taskId } = req.params;
-      if (!taskId) { res.status(400).json({ error: "Task ID is required" }); return; }
-
-      const task = await tasksService.getTask(req.user.userId, taskId);
-      res.json(task);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+    const { taskId } = req.params;
+    if (!taskId) {
+      throw { statusCode: 400, message: "Task ID is required" } as AppError;
     }
-  },
 
-  updateTask: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
+    const data = await handleGetTask(req.user.userId, taskId);
 
-      const { taskId } = req.params;
-      if (!taskId) { res.status(400).json({ error: "Task ID is required" }); return; }
+    res.status(200).json({
+      success: true,
+      message: "Task fetched",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      const task = await tasksService.updateTask(req.user.userId, taskId, req.body);
-      res.json(task);
-    } catch (error) {
-      handleGoogleError(error, res, next);
+export const updateTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
     }
-  },
 
-  deleteTask: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-
-      const { taskId } = req.params;
-      if (!taskId) { res.status(400).json({ error: "Task ID is required" }); return; }
-
-      await tasksService.deleteTask(req.user.userId, taskId);
-      res.status(204).send();
-    } catch (error) {
-      handleGoogleError(error, res, next);
+    const { taskId } = req.params;
+    if (!taskId) {
+      throw { statusCode: 400, message: "Task ID is required" } as AppError;
     }
-  },
+
+    await handleUpdateTask(req.user.userId, taskId, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Task updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteTask = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    const { taskId } = req.params;
+    if (!taskId) {
+      throw { statusCode: 400, message: "Task ID is required" } as AppError;
+    }
+
+    await handleDeleteTask(req.user.userId, taskId);
+
+    res.status(200).json({
+      success: true,
+      message: "Task deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
 };

@@ -186,7 +186,7 @@ export function EventEditDrawer({
       onOpenChange(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        const msg = err.response?.data?.error || err.message;
+        const msg = err.response?.data?.message || err.message;
         setSaveError(
           msg === "Google account not connected"
             ? "Connect your Google account first (see banner above)."

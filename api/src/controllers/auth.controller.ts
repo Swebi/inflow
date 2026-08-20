@@ -1,55 +1,59 @@
 import { Request, Response, NextFunction } from "express";
-import { authService } from "../services/auth.service";
-import { AuthRequest } from "../types/schema";
+import { handleRegister, handleLogin, handleGetMe } from "../services/auth.service";
+import { AuthRequest, AppError } from "../types/schema";
 
-export const authController = {
-  register: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { email, password, name } = req.body;
-      if (!email || !password) {
-        res.status(400).json({ error: "Email and password are required" });
-        return;
-      }
-      const result = await authService.register(email, password, name);
-      res.status(201).json(result);
-    } catch (error) {
-      if (error instanceof Error && error.message === "User already exists") {
-        res.status(409).json({ error: error.message });
-        return;
-      }
-      next(error);
+export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, password, name } = req.body;
+    if (!email || !password) {
+      throw { statusCode: 400, message: "Email and password are required" } as AppError;
     }
-  },
 
-  login: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        res.status(400).json({ error: "Email and password are required" });
-        return;
-      }
-      const result = await authService.login(email, password);
-      res.json(result);
-    } catch (error) {
-      if (error instanceof Error && error.message === "Invalid credentials") {
-        res.status(401).json({ error: error.message });
-        return;
-      }
-      next(error);
-    }
-  },
+    const data = await handleRegister(email, password, name);
 
-  me: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-      const user = await authService.getMe(req.user.userId);
-      res.json(user);
-    } catch (error) {
-      if (error instanceof Error && error.message === "User not found") {
-        res.status(404).json({ error: error.message });
-        return;
-      }
-      next(error);
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw { statusCode: 400, message: "Email and password are required" } as AppError;
     }
-  },
+
+    const data = await handleLogin(email, password);
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const me = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    const data = await handleGetMe(req.user.userId);
+
+    res.status(200).json({
+      success: true,
+      message: "User details fetched",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
 };

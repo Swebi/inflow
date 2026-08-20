@@ -1,11 +1,17 @@
 import { Router } from "express";
-import { googleController } from "../controllers/google.controller";
+import {
+  getAuthUrl,
+  handleCallback,
+  handleOAuthCallback,
+  getStatus,
+  getUserInfo,
+} from "../controllers/google.controller";
 import { authMiddleware } from "../middlewares/auth";
 
 export const googleRouter = Router();
 
-googleRouter.get("/auth", authMiddleware, googleController.getAuthUrl);
-googleRouter.post("/auth/callback", googleController.handleCallback);
-googleRouter.get("/callback", googleController.handleOAuthCallback);
-googleRouter.get("/status", authMiddleware, googleController.getStatus);
-googleRouter.get("/user", googleController.getUserInfo);
+googleRouter.get("/auth", authMiddleware, getAuthUrl);
+googleRouter.post("/auth/callback", handleCallback);
+googleRouter.get("/callback", handleOAuthCallback);
+googleRouter.get("/status", authMiddleware, getStatus);
+googleRouter.get("/user", getUserInfo);

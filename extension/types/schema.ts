@@ -18,9 +18,13 @@ export interface ScannedEventResponse {
   kind?: "registration_deadline" | "event" | "deadline" | "other";
 }
 
-/** API response shape: { events: ScannedEventResponse[] } */
+/** API response shape: { success, message, data: { events: ScannedEventResponse[] } } */
 export interface ProcessEmailResponse {
-  events: ScannedEventResponse[];
+  success: boolean;
+  message: string;
+  data: {
+    events: ScannedEventResponse[];
+  };
 }
 
 /** Form data for the edit-event drawer */

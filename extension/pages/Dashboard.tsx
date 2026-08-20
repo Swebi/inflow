@@ -48,9 +48,34 @@ export function Dashboard() {
 
       if (!tab.id) throw new Error("Could not get active tab");
 
-      const response = await browser.tabs.sendMessage(tab.id, {
-        action: "extractEmail",
-      });
+      // Content script only runs on Gmail; skip quietly elsewhere instead of
+      // letting sendMessage throw "Receiving end does not exist".
+      if (!tab.url?.includes("mail.google.com")) {
+        setEmailContent("");
+        return;
+      }
+
+      let response;
+      try {
+        response = await browser.tabs.sendMessage(tab.id, {
+          action: "extractEmail",
+        });
+      } catch (sendError) {
+        // The tab may have loaded before the content script attached (e.g.
+        // it was already open when the extension installed/reloaded).
+        // Inject it directly and retry once before giving up.
+        const message =
+          sendError instanceof Error ? sendError.message : String(sendError);
+        if (!message.includes("Receiving end does not exist")) throw sendError;
+
+        await browser.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["content-scripts/content.js"],
+        });
+        response = await browser.tabs.sendMessage(tab.id, {
+          action: "extractEmail",
+        });
+      }
 
       if (response?.success && response.content) {
         setEmailContent(response.content);
@@ -59,8 +84,11 @@ export function Dashboard() {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      const message = errorMessage.includes("Receiving end does not exist")
+        ? "Couldn't connect to the Gmail tab. Try refreshing it."
+        : errorMessage;
       setError(
-        errorMessage ||
+        message ||
           "Failed to extract email from page. Make sure you're viewing an email in Gmail."
       );
     } finally {
@@ -135,12 +163,14 @@ export function Dashboard() {
         { emailContent },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
-      setScannedEvents(result.data.events);
+      setScannedEvents(result.data.data.events);
       setDrawerOpen(true);
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(
-          err.response?.data?.error || err.message || "Failed to process email"
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to process email"
         );
       } else {
         setError("An unexpected error occurred");

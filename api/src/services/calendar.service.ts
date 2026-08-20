@@ -1,89 +1,82 @@
 import { getCalendarClient } from "../utils/google";
 import { generateEvent } from "../utils/calendar";
 import { CalendarEvent, CreateEventData, ListEventsData } from "../types/schema";
-import { googleService } from "./google.service";
+import { handleGetValidGoogleTokens } from "./google.service";
 
-export const calendarService = {
-  createEvent: async (data: CreateEventData) => {
-    const { accessToken, refreshToken, expiryDate } =
-      await googleService.getValidTokens(data.userId);
-    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
+export const handleCreateEvent = async (data: CreateEventData) => {
+  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(data.userId);
+  const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
-    const event = generateEvent({
-      summary: data.summary,
-      startTime: data.startTime,
-      endTime: data.endTime,
-      date: data.date,
-      description: data.description,
-      location: data.location,
-      color: data.color,
-      timeZone: data.timeZone,
-    });
+  const event = generateEvent({
+    summary: data.summary,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    date: data.date,
+    description: data.description,
+    location: data.location,
+    color: data.color,
+    timeZone: data.timeZone,
+  });
 
-    const response = await calendarClient.events.insert({
-      calendarId: "primary",
-      requestBody: event,
-    });
+  const response = await calendarClient.events.insert({
+    calendarId: "primary",
+    requestBody: event,
+  });
 
-    return response.data;
-  },
+  return response.data;
+};
 
-  listEvents: async (data: ListEventsData) => {
-    const { accessToken, refreshToken, expiryDate } =
-      await googleService.getValidTokens(data.userId);
-    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
+export const handleListEvents = async (data: ListEventsData) => {
+  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(data.userId);
+  const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
-    const response = await calendarClient.events.list({
-      calendarId: "primary",
-      timeMin: data.timeMin,
-      timeMax: data.timeMax,
-      maxResults: data.maxResults || 10,
-      singleEvents: true,
-      orderBy: "startTime",
-    });
+  const response = await calendarClient.events.list({
+    calendarId: "primary",
+    timeMin: data.timeMin,
+    timeMax: data.timeMax,
+    maxResults: data.maxResults || 10,
+    singleEvents: true,
+    orderBy: "startTime",
+  });
 
-    return response.data.items || [];
-  },
+  return response.data.items || [];
+};
 
-  getEvent: async (userId: string, eventId: string) => {
-    const { accessToken, refreshToken, expiryDate } =
-      await googleService.getValidTokens(userId);
-    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
+export const handleGetEvent = async (userId: string, eventId: string) => {
+  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(userId);
+  const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
-    const response = await calendarClient.events.get({
-      calendarId: "primary",
-      eventId,
-    });
+  const response = await calendarClient.events.get({
+    calendarId: "primary",
+    eventId,
+  });
 
-    return response.data;
-  },
+  return response.data;
+};
 
-  updateEvent: async (
-    userId: string,
-    eventId: string,
-    eventData: Partial<CalendarEvent>
-  ) => {
-    const { accessToken, refreshToken, expiryDate } =
-      await googleService.getValidTokens(userId);
-    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
+export const handleUpdateEvent = async (
+  userId: string,
+  eventId: string,
+  eventData: Partial<CalendarEvent>
+) => {
+  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(userId);
+  const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
-    const response = await calendarClient.events.patch({
-      calendarId: "primary",
-      eventId,
-      requestBody: eventData,
-    });
+  const response = await calendarClient.events.patch({
+    calendarId: "primary",
+    eventId,
+    requestBody: eventData,
+  });
 
-    return response.data;
-  },
+  return response.data;
+};
 
-  deleteEvent: async (userId: string, eventId: string) => {
-    const { accessToken, refreshToken, expiryDate } =
-      await googleService.getValidTokens(userId);
-    const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
+export const handleDeleteEvent = async (userId: string, eventId: string) => {
+  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(userId);
+  const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
 
-    await calendarClient.events.delete({
-      calendarId: "primary",
-      eventId,
-    });
-  },
+  await calendarClient.events.delete({
+    calendarId: "primary",
+    eventId,
+  });
 };

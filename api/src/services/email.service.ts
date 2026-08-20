@@ -36,12 +36,11 @@ function sortByPriority(events: ExtractedEvent[]): ExtractedEvent[] {
   });
 }
 
-export const emailService = {
-  extractEvents: async (
-    emailContent: string,
-    requestId?: string
-  ): Promise<ExtractedEvent[]> => {
-    const logPrefix = requestId ? `[${requestId}]` : "[email-service]";
+export const handleExtractEvents = async (
+  emailContent: string,
+  requestId?: string
+): Promise<ExtractedEvent[]> => {
+  const logPrefix = requestId ? `[${requestId}]` : "[email-service]";
 
     try {
       console.log(`${logPrefix} Initializing Gemini model (gemini-2.5-flash)`);
@@ -162,5 +161,4 @@ export const emailService = {
         }`
       );
     }
-  },
 };

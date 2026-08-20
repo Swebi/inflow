@@ -1,3 +1,8 @@
+export interface AppError {
+  statusCode: number;
+  message: string;
+}
+
 export type ExtractedEventKind =
   | "registration_deadline"
   | "event"

@@ -1,17 +1,20 @@
 import { Response, NextFunction } from "express";
-import { authService } from "../services/auth.service";
-import { AuthRequest } from "../types/schema";
+import { handleVerifyToken } from "../services/auth.service";
+import { AuthRequest, AppError } from "../types/schema";
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const authMiddleware = (req: AuthRequest, _res: Response, next: NextFunction): void => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith("Bearer ")) {
-      res.status(401).json({ error: "No token provided" });
+      throw { statusCode: 401, message: "No token provided" } as AppError;
+    }
+    req.user = handleVerifyToken(authHeader.split(" ")[1]);
+    next();
+  } catch (error) {
+    if (error && typeof error === "object" && "statusCode" in error) {
+      next(error);
       return;
     }
-    req.user = authService.verifyToken(authHeader.split(" ")[1]);
-    next();
-  } catch {
-    res.status(401).json({ error: "Invalid token" });
+    next({ statusCode: 401, message: "Invalid token" } as AppError);
   }
 };

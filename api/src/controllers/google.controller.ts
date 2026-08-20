@@ -1,84 +1,113 @@
 import { Request, Response, NextFunction } from "express";
 import { getTokensFromCode } from "../utils/google";
-import { googleService } from "../services/google.service";
-import { AuthRequest } from "../types/schema";
+import {
+  handleGetAuthUrl,
+  handleGoogleCallback,
+  handleGetGoogleStatus,
+  handleGetGoogleUserInfo,
+} from "../services/google.service";
+import { AuthRequest, AppError } from "../types/schema";
 
-export const googleController = {
-  getAuthUrl: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-      const authUrl = googleService.getAuthUrl(req.user.userId);
-      res.json({ authUrl });
-    } catch (error) {
-      next(error);
+export const getAuthUrl = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
     }
-  },
 
-  // Legacy POST endpoint kept for when a web frontend captures the code
-  handleCallback: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { code } = req.body;
-      if (!code || typeof code !== "string") {
-        res.status(400).json({ error: "Authorization code is required" });
-        return;
-      }
-      const tokens = await getTokensFromCode(code);
-      res.json(tokens);
-    } catch (error) {
-      next(error);
+    const authUrl = handleGetAuthUrl(req.user.userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Auth URL generated",
+      data: { authUrl },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Legacy POST endpoint kept for when a web frontend captures the code
+export const handleCallback = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { code } = req.body;
+    if (!code || typeof code !== "string") {
+      throw { statusCode: 400, message: "Authorization code is required" } as AppError;
     }
-  },
 
-  // GET handler for the actual Google OAuth redirect
-  handleOAuthCallback: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { code, state, error: oauthError } = req.query;
+    const data = await getTokensFromCode(code);
 
-      if (oauthError) {
-        res.send(buildCallbackPage(false, String(oauthError)));
-        return;
-      }
+    res.status(200).json({
+      success: true,
+      message: "Authorization code exchanged",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      if (!code || typeof code !== "string") {
-        res.status(400).send("Missing authorization code");
-        return;
-      }
+// GET handler for the actual Google OAuth redirect
+export const handleOAuthCallback = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { code, state, error: oauthError } = req.query;
 
-      if (!state || typeof state !== "string") {
-        res.status(400).send("Missing state (user ID)");
-        return;
-      }
-
-      await googleService.handleCallback(code, state);
-      res.send(buildCallbackPage(true));
-    } catch (error) {
-      next(error);
+    if (oauthError) {
+      res.send(buildCallbackPage(false, String(oauthError)));
+      return;
     }
-  },
 
-  getStatus: async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      if (!req.user) { res.status(401).json({ error: "Unauthorized" }); return; }
-      const status = await googleService.getStatus(req.user.userId);
-      res.json(status);
-    } catch (error) {
-      next(error);
+    if (!code || typeof code !== "string") {
+      res.status(400).send("Missing authorization code");
+      return;
     }
-  },
 
-  getUserInfo: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const accessToken = req.headers.authorization?.replace("Bearer ", "");
-      if (!accessToken) {
-        res.status(401).json({ error: "Access token is required" });
-        return;
-      }
-      const userInfo = await googleService.getUserInfo(accessToken);
-      res.json(userInfo);
-    } catch (error) {
-      next(error);
+    if (!state || typeof state !== "string") {
+      res.status(400).send("Missing state (user ID)");
+      return;
     }
-  },
+
+    await handleGoogleCallback(code, state);
+    res.send(buildCallbackPage(true));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getStatus = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    const data = await handleGetGoogleStatus(req.user.userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Google status fetched",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const accessToken = req.headers.authorization?.replace("Bearer ", "");
+    if (!accessToken) {
+      throw { statusCode: 401, message: "Access token is required" } as AppError;
+    }
+
+    const data = await handleGetGoogleUserInfo(accessToken);
+
+    res.status(200).json({
+      success: true,
+      message: "User info fetched",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 function buildCallbackPage(success: boolean, errorMsg?: string) {

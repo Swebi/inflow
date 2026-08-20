@@ -8,7 +8,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
   }),
   manifest: {
-    permissions: ["tabs", "activeTab", "sidePanel", "storage"],
+    permissions: ["tabs", "activeTab", "sidePanel", "storage", "scripting"],
     host_permissions: ["*://mail.google.com/*"],
     action: {
       default_title: "Open Inflow",

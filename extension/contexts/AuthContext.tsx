@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await axios.get(`${API_BASE_URL}/google/status`, {
           headers: { Authorization: `Bearer ${t}` },
         });
-        setGoogleConnected(response.data.connected === true);
+        setGoogleConnected(response.data.data.connected === true);
       } catch {
         setGoogleConnected(false);
       }
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const response = await axios.get(`${API_BASE_URL}/auth/me`, {
               headers: { Authorization: `Bearer ${storedToken}` },
             });
-            setUser(response.data);
+            setUser(response.data.data);
             await checkGoogleStatus(storedToken);
           } catch {
             if (browser.storage?.local) {
@@ -110,12 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch((error) => {
         if (axios.isAxiosError(error)) {
-          throw new Error(error.response?.data?.error || "Failed to login");
+          throw new Error(error.response?.data?.message || "Failed to login");
         }
         throw new Error("An unexpected error occurred");
       });
 
-    const { user: userData, token: authToken } = response.data;
+    const { user: userData, token: authToken } = response.data.data;
     setUser(userData);
     setToken(authToken);
     if (browser.storage?.local) {
@@ -133,12 +133,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch((error) => {
         if (axios.isAxiosError(error)) {
-          throw new Error(error.response?.data?.error || "Failed to register");
+          throw new Error(error.response?.data?.message || "Failed to register");
         }
         throw new Error("An unexpected error occurred");
       });
 
-    const { user: userData, token: authToken } = response.data;
+    const { user: userData, token: authToken } = response.data.data;
     setUser(userData);
     setToken(authToken);
     if (browser.storage?.local) {
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    const { authUrl } = response.data;
+    const { authUrl } = response.data.data;
     const tab = await browser.tabs.create({ url: authUrl });
 
     // When the auth tab closes, re-check status
