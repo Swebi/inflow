@@ -1,11 +1,26 @@
 export type EventSource = "google-calendar" | "google-tasks";
 
 export interface EventResponse {
+  id?: string;
   title: string;
   date: string;
   time?: string;
   notes?: string;
   source: EventSource;
+}
+
+/** API response shape for one row from GET /api/actions */
+export interface RecentActionResponse {
+  id: string;
+  type: "CALENDAR_EVENT" | "TASK";
+  addedBy: "USER" | "AGENT";
+  title: string;
+  date: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  notes?: string | null;
+  externalId?: string | null;
+  createdAt: string;
 }
 
 /** API response from /api/email/process – single extracted event */
@@ -51,7 +66,7 @@ export interface EventEditDrawerProps {
   onOpenChange: (open: boolean) => void;
   /** Parsed actions from email – drawer shows picker (2+) or form (1) */
   initialEvents: ScannedEventResponse[] | null;
-  onSave: (event: EventResponse) => void;
+  onSave: () => void;
 }
 
 export interface EventCardProps {

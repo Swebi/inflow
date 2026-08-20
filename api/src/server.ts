@@ -5,6 +5,7 @@ import { emailRouter } from "./routers/email.router";
 import { googleRouter } from "./routers/google.router";
 import { calendarRouter } from "./routers/calendar.router";
 import { tasksRouter } from "./routers/tasks.router";
+import { actionsRouter } from "./routers/actions.router";
 import { errorHandler } from "./middlewares/errorHandler";
 import cors from "cors";
 
@@ -22,6 +23,7 @@ app.use("/api/email", emailRouter);
 app.use("/api/google", googleRouter);
 app.use("/api/calendar", calendarRouter);
 app.use("/api/tasks", tasksRouter);
+app.use("/api/actions", actionsRouter);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });

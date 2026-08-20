@@ -13,6 +13,12 @@ export function createEventDateTime(
   return `${date}T${time}:00`;
 }
 
+export function addOneDay(date: string): string {
+  const d = new Date(`${date}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export function generateEvent(params: GenerateEventParams): CalendarEvent {
   const {
     summary,
@@ -25,19 +31,16 @@ export function generateEvent(params: GenerateEventParams): CalendarEvent {
     timeZone = DEFAULT_TIMEZONE,
   } = params;
 
-  const start = createEventDateTime(startTime, date, timeZone);
-  const end = createEventDateTime(endTime, date, timeZone);
+  const hasTime = Boolean(startTime && endTime);
 
   const event: CalendarEvent = {
     summary,
-    start: {
-      dateTime: start,
-      timeZone,
-    },
-    end: {
-      dateTime: end,
-      timeZone,
-    },
+    start: hasTime
+      ? { dateTime: createEventDateTime(startTime!, date, timeZone), timeZone }
+      : { date },
+    end: hasTime
+      ? { dateTime: createEventDateTime(endTime!, date, timeZone), timeZone }
+      : { date: addOneDay(date) },
     reminders: {
       useDefault: false,
     },

@@ -2,7 +2,11 @@ import { getCalendarClient } from "../utils/google";
 import { generateEvent } from "../utils/calendar";
 import { CalendarEvent, CreateEventData, ListEventsData } from "../types/schema";
 import { handleGetValidGoogleTokens } from "./google.service";
+import { handleRecordAction } from "./actions.service";
 
+// All Calendar-event creation MUST go through this function — it is the
+// single source of truth for the Action audit trail (used by both the
+// manual save flow and, eventually, the agentic flow).
 export const handleCreateEvent = async (data: CreateEventData) => {
   const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(data.userId);
   const calendarClient = getCalendarClient(accessToken, refreshToken, expiryDate);
@@ -23,7 +27,17 @@ export const handleCreateEvent = async (data: CreateEventData) => {
     requestBody: event,
   });
 
-  return response.data;
+  return handleRecordAction({
+    userId: data.userId,
+    type: "CALENDAR_EVENT",
+    addedBy: "USER",
+    title: data.summary,
+    date: data.date,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    notes: data.description,
+    externalId: response.data.id ?? undefined,
+  });
 };
 
 export const handleListEvents = async (data: ListEventsData) => {

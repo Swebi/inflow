@@ -1,5 +1,6 @@
 import { getTasksClient } from "../utils/google";
 import { handleGetValidGoogleTokens } from "./google.service";
+import { handleRecordAction } from "./actions.service";
 
 export interface CreateTaskData {
   userId: string;
@@ -16,6 +17,9 @@ export interface ListTasksData {
   maxResults?: number;
 }
 
+// All Task creation MUST go through this function — it is the single
+// source of truth for the Action audit trail (used by both the manual
+// save flow and, eventually, the agentic flow).
 export const handleCreateTask = async (data: CreateTaskData) => {
   const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(data.userId);
   const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
@@ -31,7 +35,16 @@ export const handleCreateTask = async (data: CreateTaskData) => {
     },
   });
 
-  return response.data;
+  return handleRecordAction({
+    userId: data.userId,
+    type: "TASK",
+    addedBy: "USER",
+    title: data.title,
+    date: data.dueDate,
+    startTime: data.dueTime,
+    notes: data.notes,
+    externalId: response.data.id ?? undefined,
+  });
 };
 
 export const handleListTasks = async (data: ListTasksData) => {

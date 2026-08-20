@@ -12,8 +12,12 @@ import { GoogleConnectBanner } from "@/components/GoogleConnectBanner";
 import {
   EventResponse,
   ProcessEmailResponse,
+  RecentActionResponse,
   ScannedEventResponse,
 } from "@/types/schema";
+import { actionToEvent } from "@/utils/event";
+
+const API_BASE_URL = "http://localhost:8000/api";
 
 export function Dashboard() {
   const { user, token, logout, googleConnected } = useAuth();
@@ -34,6 +38,24 @@ export function Dashboard() {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
+
+  const fetchRecentActions = useCallback(async () => {
+    if (!token) return;
+    try {
+      const result = await axios.get<{ data: RecentActionResponse[] }>(
+        `${API_BASE_URL}/actions`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setEvents(result.data.data.map(actionToEvent));
+    } catch (err) {
+      console.error("Failed to fetch recent actions", err);
+    }
+  }, [token]);
+
+  // Recents is sourced entirely from the DB - hydrate on mount/login.
+  useEffect(() => {
+    fetchRecentActions();
+  }, [fetchRecentActions]);
 
   const extractEmailFromPage = useCallback(async () => {
     console.log("[Sidepanel] Starting email extraction...");
@@ -159,7 +181,7 @@ export function Dashboard() {
 
     try {
       const result = await axios.post<ProcessEmailResponse>(
-        "http://localhost:8000/api/email/process",
+        `${API_BASE_URL}/email/process`,
         { emailContent },
         { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
@@ -180,10 +202,10 @@ export function Dashboard() {
     }
   };
 
-  const handleDrawerSave = (event: EventResponse) => {
-    setEvents((prev) => [event, ...prev]);
+  const handleDrawerSave = () => {
     setDrawerOpen(false);
     setScannedEvents(null);
+    fetchRecentActions();
   };
 
   const getGreeting = () => {

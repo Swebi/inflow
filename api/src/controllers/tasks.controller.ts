@@ -19,7 +19,7 @@ export const createTask = async (req: AuthRequest, res: Response, next: NextFunc
       throw { statusCode: 400, message: "title is required" } as AppError;
     }
 
-    await handleCreateTask({
+    const action = await handleCreateTask({
       userId: req.user.userId,
       title,
       notes,
@@ -30,6 +30,7 @@ export const createTask = async (req: AuthRequest, res: Response, next: NextFunc
     res.status(201).json({
       success: true,
       message: "Task created successfully",
+      data: action,
     });
   } catch (error) {
     next(error);

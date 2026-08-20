@@ -16,11 +16,15 @@ export const createEvent = async (req: AuthRequest, res: Response, next: NextFun
 
     const { summary, startTime, endTime, date, description, location, color, timeZone } = req.body;
 
-    if (!summary || !startTime || !endTime || !date) {
-      throw { statusCode: 400, message: "summary, startTime, endTime, and date are required" } as AppError;
+    if (!summary || !date) {
+      throw { statusCode: 400, message: "summary and date are required" } as AppError;
     }
 
-    await handleCreateEvent({
+    if ((startTime && !endTime) || (endTime && !startTime)) {
+      throw { statusCode: 400, message: "startTime and endTime must be provided together" } as AppError;
+    }
+
+    const action = await handleCreateEvent({
       userId: req.user.userId,
       summary,
       startTime,
@@ -35,6 +39,7 @@ export const createEvent = async (req: AuthRequest, res: Response, next: NextFun
     res.status(201).json({
       success: true,
       message: "Event created successfully",
+      data: action,
     });
   } catch (error) {
     next(error);

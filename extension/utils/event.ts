@@ -1,5 +1,5 @@
 import { parse, format, addHours, subHours } from "date-fns";
-import { EventFormData, EventResponse, ScannedEventResponse } from "@/types/schema";
+import { EventResponse, RecentActionResponse, ScannedEventResponse } from "@/types/schema";
 
 export function parseTimeToHHmm(time: string): string {
   const [h, m] = time.split(":").map((s) => parseInt(s, 10) || 0);
@@ -55,25 +55,27 @@ export function scannedToFormData(data: ScannedEventResponse): EventFormData {
   };
 }
 
-export function formDataToEvent(data: EventFormData): EventResponse {
-  if (data.source === "google-tasks") {
-    return {
-      title: data.title,
-      date: format(data.dueDate, "dd.MM.yyyy"),
-      time: data.dueTime || undefined,
-      notes: data.description || undefined,
-      source: "google-tasks",
-    };
+export function actionToEvent(action: RecentActionResponse): EventResponse {
+  let date = "No due date";
+  if (action.date) {
+    try {
+      date = format(parse(action.date, "yyyy-MM-dd", new Date()), "dd.MM.yyyy");
+    } catch {
+      date = action.date;
+    }
   }
-  const hasStart = data.startTime != null && data.startTime !== "";
-  const hasEnd = data.endTime != null && data.endTime !== "";
-  const timeStr =
-    hasStart && hasEnd ? `${data.startTime} - ${data.endTime}` : undefined;
+
+  const time =
+    action.startTime && action.endTime
+      ? `${action.startTime} - ${action.endTime}`
+      : action.startTime ?? undefined;
+
   return {
-    title: data.title,
-    date: format(data.startDate, "dd.MM.yyyy"),
-    time: timeStr,
-    notes: data.description || undefined,
-    source: "google-calendar",
+    id: action.id,
+    title: action.title,
+    date,
+    time,
+    notes: action.notes ?? undefined,
+    source: action.type === "TASK" ? "google-tasks" : "google-calendar",
   };
 }

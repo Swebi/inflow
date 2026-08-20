@@ -7,13 +7,12 @@ import axios from "axios";
 
 import {
   EventFormData,
-  EventResponse,
   EventSource,
   ScannedEventResponse,
   DrawerScreen,
   EventEditDrawerProps,
 } from "@/types/schema";
-import { scannedToFormData, formDataToEvent } from "@/utils/event";
+import { scannedToFormData } from "@/utils/event";
 import { useAuth } from "@/contexts/AuthContext";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
@@ -155,12 +154,13 @@ export function EventEditDrawer({
       if (form.source === "google-calendar") {
         const dateStr = format(form.startDate, "yyyy-MM-dd");
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const hasTime = Boolean(form.startTime && form.endTime);
         await axios.post(
           `${API_BASE_URL}/calendar/events`,
           {
             summary: form.title.trim(),
-            startTime: form.startTime || "09:00",
-            endTime: form.endTime || "10:00",
+            startTime: hasTime ? form.startTime : undefined,
+            endTime: hasTime ? form.endTime : undefined,
             date: dateStr,
             description: form.description.trim() || undefined,
             timeZone,
@@ -181,8 +181,7 @@ export function EventEditDrawer({
         );
       }
 
-      const event: EventResponse = formDataToEvent(form);
-      onSave(event);
+      onSave();
       onOpenChange(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {

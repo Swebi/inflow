@@ -20,4 +20,32 @@ model User {
     googleTokenExpiry  DateTime?
     createdAt          DateTime  @default(now())
     updatedAt          DateTime  @updatedAt
+    actions            Action[]
+}
+
+enum ActionType {
+    CALENDAR_EVENT
+    TASK
+}
+
+enum AddedBy {
+    USER
+    AGENT
+}
+
+model Action {
+    id         String     @id @default(uuid())
+    userId     String
+    user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    type       ActionType
+    addedBy    AddedBy    @default(USER)
+    title      String
+    date       String?
+    startTime  String?
+    endTime    String?
+    notes      String?
+    externalId String?
+    createdAt  DateTime   @default(now())
+
+    @@index([userId, createdAt])
 }

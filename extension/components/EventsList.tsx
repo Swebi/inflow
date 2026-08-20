@@ -105,7 +105,7 @@ export function EventsList({
 
       <div className="space-y-3">
         {filteredEvents.map((event, index) => (
-          <EventCard key={index} event={event} variant="light" />
+          <EventCard key={event.id ?? index} event={event} variant="light" />
         ))}
       </div>
 
