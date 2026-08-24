@@ -1,27 +1,14 @@
 import { getTasksClient } from "../utils/google";
 import { handleGetValidGoogleTokens } from "./google.service";
 import { handleRecordAction } from "./actions.service";
-
-export interface CreateTaskData {
-  userId: string;
-  title: string;
-  notes?: string;
-  dueDate?: string;
-  dueTime?: string;
-}
-
-export interface ListTasksData {
-  userId: string;
-  dueMin?: string;
-  dueMax?: string;
-  maxResults?: number;
-}
+import { CreateTaskData, ListTasksData } from "../types/schema";
 
 // All Task creation MUST go through this function — it is the single
 // source of truth for the Action audit trail (used by both the manual
 // save flow and, eventually, the agentic flow).
 export const handleCreateTask = async (data: CreateTaskData) => {
-  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(data.userId);
+  const { accessToken, refreshToken, expiryDate } =
+    await handleGetValidGoogleTokens(data.userId);
   const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
 
   const due = data.dueDate ? `${data.dueDate}T00:00:00.000Z` : undefined;
@@ -36,9 +23,11 @@ export const handleCreateTask = async (data: CreateTaskData) => {
   });
 
   return handleRecordAction({
+    id: data.existingActionId,
     userId: data.userId,
     type: "TASK",
-    addedBy: "USER",
+    status: "APPROVED",
+    addedBy: data.addedBy ?? "USER",
     title: data.title,
     date: data.dueDate,
     startTime: data.dueTime,
@@ -48,7 +37,8 @@ export const handleCreateTask = async (data: CreateTaskData) => {
 };
 
 export const handleListTasks = async (data: ListTasksData) => {
-  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(data.userId);
+  const { accessToken, refreshToken, expiryDate } =
+    await handleGetValidGoogleTokens(data.userId);
   const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
 
   const response = await tasksClient.tasks.list({
@@ -62,7 +52,8 @@ export const handleListTasks = async (data: ListTasksData) => {
 };
 
 export const handleGetTask = async (userId: string, taskId: string) => {
-  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(userId);
+  const { accessToken, refreshToken, expiryDate } =
+    await handleGetValidGoogleTokens(userId);
   const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
 
   const response = await tasksClient.tasks.get({
@@ -78,7 +69,8 @@ export const handleUpdateTask = async (
   taskId: string,
   taskData: { title?: string; notes?: string; due?: string; status?: string }
 ) => {
-  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(userId);
+  const { accessToken, refreshToken, expiryDate } =
+    await handleGetValidGoogleTokens(userId);
   const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
 
   const response = await tasksClient.tasks.patch({
@@ -91,7 +83,8 @@ export const handleUpdateTask = async (
 };
 
 export const handleDeleteTask = async (userId: string, taskId: string) => {
-  const { accessToken, refreshToken, expiryDate } = await handleGetValidGoogleTokens(userId);
+  const { accessToken, refreshToken, expiryDate } =
+    await handleGetValidGoogleTokens(userId);
   const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
 
   await tasksClient.tasks.delete({

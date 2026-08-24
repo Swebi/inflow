@@ -1,4 +1,4 @@
-import { google, calendar_v3, tasks_v1 } from "googleapis";
+import { google, calendar_v3, tasks_v1, gmail_v1 } from "googleapis";
 import { GOOGLE_SCOPES } from "../constants/google";
 
 export const oauth2Client = new google.auth.OAuth2(
@@ -68,6 +68,17 @@ export function getTasksClient(
   expiryDate?: Date | null
 ): tasks_v1.Tasks {
   return google.tasks({
+    version: "v1",
+    auth: createAuthClient(accessToken, refreshToken, expiryDate),
+  });
+}
+
+export function getGmailClient(
+  accessToken: string,
+  refreshToken?: string | null,
+  expiryDate?: Date | null
+): gmail_v1.Gmail {
+  return google.gmail({
     version: "v1",
     auth: createAuthClient(accessToken, refreshToken, expiryDate),
   });

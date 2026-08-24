@@ -8,13 +8,11 @@ For each actionable moment, extract:
 3. **startTime** – HH:MM 24-hour, or null if not mentioned
 4. **endTime** – HH:MM 24-hour, or null if not mentioned
 5. **notes** – Brief context (purpose, requirements, venue, etc.)
-6. **kind** – One of: "registration_deadline" | "event" | "deadline" | "other"
+6. **kind** – A short snake_case label for what this moment is (e.g. "registration_deadline", "event", "payment_due", "rsvp_deadline", "meeting", "travel"). Not a fixed list — use whatever concise label best fits. If nothing more specific applies, use "other".
 
-**kind** rules:
-- "registration_deadline": Last date to register (e.g. "Last Date to Register: 01/02/2026")
-- "event": The main event date (hackathon, meeting, workshop, etc.)
-- "deadline": Other deadlines (submission, payment, etc.)
-- "other": Any other temporal moment that does not fit above
+**kind guidance:**
+- Deadlines (registering, applying, submitting, paying, RSVPing) should be tagged distinctly from the thing they gate — don't lump "registration_deadline" and "event" under the same tag.
+- Prefer an existing common label (see examples above) over inventing a new one, but invent one if nothing fits.
 
 **Format rules:**
 - Dates: DD.MM.YYYY (e.g. 31.01.2026)
@@ -26,7 +24,7 @@ For each actionable moment, extract:
 **Output:**
 - Return a JSON **array** of objects. Each object has: title, date, startTime, endTime, notes, kind.
 - Include **all** temporal anchors you find (zero, one, or many).
-- Sort the array by **date** (earliest first). If same date, put registration_deadline / deadline before event.
+- Sort the array by **date** (earliest first). For same-date items, put deadlines before the thing they gate.
 - If no clear event or deadline is found, return an empty array: []
 
 **Example – Hackathon with registration deadline and event:**

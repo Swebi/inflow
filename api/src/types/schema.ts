@@ -1,13 +1,10 @@
+import { Request } from "express";
+import { EventColorKey } from "../constants/calendar";
+
 export interface AppError {
   statusCode: number;
   message: string;
 }
-
-export type ExtractedEventKind =
-  | "registration_deadline"
-  | "event"
-  | "deadline"
-  | "other";
 
 export interface ExtractedEvent {
   title: string;
@@ -15,10 +12,8 @@ export interface ExtractedEvent {
   startTime?: string | null;
   endTime?: string | null;
   notes?: string;
-  kind?: ExtractedEventKind;
+  kind?: string;
 }
-
-import { Request } from "express";
 
 export interface AuthRequest extends Request {
   user?: { userId: string; email: string };
@@ -41,8 +36,6 @@ export interface CalendarEvent {
   };
 }
 
-import { EventColorKey } from "../constants/calendar";
-
 export interface GenerateEventParams {
   summary: string;
   startTime?: string;
@@ -64,6 +57,8 @@ export interface CreateEventData {
   location?: string;
   color?: EventColorKey;
   timeZone?: string;
+  addedBy?: AddedBy;
+  existingActionId?: string;
 }
 
 export interface ListEventsData {
@@ -73,14 +68,36 @@ export interface ListEventsData {
   maxResults?: number;
 }
 
+export interface CreateTaskData {
+  userId: string;
+  title: string;
+  notes?: string;
+  dueDate?: string;
+  dueTime?: string;
+  addedBy?: AddedBy;
+  existingActionId?: string;
+}
+
+export interface ListTasksData {
+  userId: string;
+  dueMin?: string;
+  dueMax?: string;
+  maxResults?: number;
+}
+
 export type ActionType = "CALENDAR_EVENT" | "TASK";
 export type AddedBy = "USER" | "AGENT";
+export type ActionStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface RecordActionData {
+  id?: string;
   userId: string;
-  type: ActionType;
-  addedBy: AddedBy;
-  title: string;
+  type?: ActionType;
+  status?: ActionStatus;
+  kind?: string;
+  threadId?: string;
+  addedBy?: AddedBy;
+  title?: string;
   date?: string;
   startTime?: string;
   endTime?: string;

@@ -1,9 +1,6 @@
 import { gemini } from "../lib/gemini";
 import { EMAIL_EXTRACTION_PROMPT } from "../prompts/email";
-import {
-  ExtractedEvent,
-  ExtractedEventKind,
-} from "../types/schema";
+import { ExtractedEvent } from "../types/schema";
 import { cleanupMarkdown } from "../utils/helpers";
 
 const DATE_FORMAT = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/;
@@ -18,22 +15,21 @@ function parseDateToMillis(dateStr: string): number {
   return new Date(year, month0, day).getTime();
 }
 
-const KIND_PRIORITY: Record<ExtractedEventKind, number> = {
-  registration_deadline: 0,
-  deadline: 1,
-  event: 2,
-  other: 3,
-};
-
 function sortByPriority(events: ExtractedEvent[]): ExtractedEvent[] {
-  return [...events].sort((a, b) => {
-    const ta = parseDateToMillis(a.date);
-    const tb = parseDateToMillis(b.date);
-    if (ta !== tb) return ta - tb;
-    const ka = (a.kind ?? "other") as ExtractedEventKind;
-    const kb = (b.kind ?? "other") as ExtractedEventKind;
-    return (KIND_PRIORITY[ka] ?? 99) - (KIND_PRIORITY[kb] ?? 99);
-  });
+  return events
+    .map((event, index) => ({ event, index }))
+    .sort((a, b) => {
+      const ta = parseDateToMillis(a.event.date);
+      const tb = parseDateToMillis(b.event.date);
+      if (ta !== tb) return ta - tb;
+
+      const aIsDeadline = (a.event.kind ?? "").toLowerCase().includes("deadline") ? 0 : 1;
+      const bIsDeadline = (b.event.kind ?? "").toLowerCase().includes("deadline") ? 0 : 1;
+      if (aIsDeadline !== bIsDeadline) return aIsDeadline - bIsDeadline;
+
+      return a.index - b.index;
+    })
+    .map(({ event }) => event);
 }
 
 export const handleExtractEvents = async (
@@ -122,12 +118,9 @@ export const handleExtractEvents = async (
         const notes =
           typeof item.notes === "string" ? item.notes.trim() : undefined;
         const kind =
-          typeof item.kind === "string" &&
-          ["registration_deadline", "event", "deadline", "other"].includes(
-            item.kind
-          )
-            ? (item.kind as ExtractedEventKind)
-          : undefined;
+          typeof item.kind === "string" && item.kind.trim()
+            ? item.kind.trim().toLowerCase().replace(/\s+/g, "_")
+            : undefined;
 
         events.push({
           title,

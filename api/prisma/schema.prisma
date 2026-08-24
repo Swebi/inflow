@@ -18,6 +18,7 @@ model User {
     googleAccessToken  String?
     googleRefreshToken String?
     googleTokenExpiry  DateTime?
+    lastGmailHistoryId String?
     createdAt          DateTime  @default(now())
     updatedAt          DateTime  @updatedAt
     actions            Action[]
@@ -28,24 +29,33 @@ enum ActionType {
     TASK
 }
 
+enum ActionStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
 enum AddedBy {
     USER
     AGENT
 }
 
 model Action {
-    id         String     @id @default(uuid())
+    id         String       @id @default(uuid())
     userId     String
-    user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-    type       ActionType
-    addedBy    AddedBy    @default(USER)
+    user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    type       ActionType?
+    status     ActionStatus @default(APPROVED)
+    kind       String?
+    threadId   String?
+    addedBy    AddedBy      @default(USER)
     title      String
     date       String?
     startTime  String?
     endTime    String?
     notes      String?
     externalId String?
-    createdAt  DateTime   @default(now())
+    createdAt  DateTime     @default(now())
 
     @@index([userId, createdAt])
 }
