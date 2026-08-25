@@ -5,6 +5,7 @@ import {
   handleGoogleCallback,
   handleGetGoogleStatus,
   handleGetGoogleUserInfo,
+  handleDisconnectGoogle,
 } from "../services/google.service";
 import { AuthRequest, AppError } from "../types/schema";
 
@@ -85,6 +86,24 @@ export const getStatus = async (req: AuthRequest, res: Response, next: NextFunct
       success: true,
       message: "Google status fetched",
       data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const disconnect = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    await handleDisconnectGoogle(req.user.userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Google account disconnected",
+      data: null,
     });
   } catch (error) {
     next(error);

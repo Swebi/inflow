@@ -29,6 +29,17 @@ export const handleGetGoogleUserInfo = async (accessToken: string) => {
   return getUserInfo(accessToken);
 };
 
+export const handleDisconnectGoogle = async (userId: string) => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      googleAccessToken: null,
+      googleRefreshToken: null,
+      googleTokenExpiry: null,
+    },
+  });
+};
+
 export const handleGetGoogleStatus = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },

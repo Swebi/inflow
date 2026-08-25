@@ -12,7 +12,7 @@ import {
   DrawerScreen,
   EventEditDrawerProps,
 } from "@/types/schema";
-import { scannedToFormData } from "@/utils/event";
+import { scannedToFormData, humanizeKind } from "@/utils/event";
 import { useAuth } from "@/contexts/AuthContext";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
@@ -38,13 +38,6 @@ import { Textarea } from "./ui/textarea";
 import { cn } from "@/lib/utils";
 
 const API_BASE_URL = "http://localhost:8000/api";
-
-const KIND_LABELS: Record<NonNullable<ScannedEventResponse["kind"]>, string> = {
-  registration_deadline: "Registration deadline",
-  event: "Event",
-  deadline: "Deadline",
-  other: "Other",
-};
 
 const SOURCE_OPTIONS: { value: EventSource; label: string; icon: string }[] = [
   { value: "google-calendar", label: "Calendar", icon: calendarIcon },
@@ -242,7 +235,7 @@ export function EventEditDrawer({
                     {ev.date}
                     {ev.kind && (
                       <span className="ml-1.5">
-                        · {KIND_LABELS[ev.kind]}
+                        · {humanizeKind(ev.kind)}
                       </span>
                     )}
                   </p>

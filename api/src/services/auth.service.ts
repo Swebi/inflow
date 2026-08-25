@@ -53,3 +53,25 @@ export const handleGetMe = async (userId: string) => {
 
   return { id: user.id, email: user.email, name: user.name };
 };
+
+export const handleChangePassword = async (
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw { statusCode: 404, message: "User not found" } as AppError;
+  }
+
+  const isValid = await bcrypt.compare(currentPassword, user.password);
+  if (!isValid) {
+    throw { statusCode: 401, message: "Current password is incorrect" } as AppError;
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
+  });
+};

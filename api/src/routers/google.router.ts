@@ -5,6 +5,7 @@ import {
   handleOAuthCallback,
   getStatus,
   getUserInfo,
+  disconnect,
 } from "../controllers/google.controller";
 import { authMiddleware } from "../middlewares/auth";
 
@@ -15,3 +16,4 @@ googleRouter.post("/auth/callback", handleCallback);
 googleRouter.get("/callback", handleOAuthCallback);
 googleRouter.get("/status", authMiddleware, getStatus);
 googleRouter.get("/user", getUserInfo);
+googleRouter.post("/disconnect", authMiddleware, disconnect);

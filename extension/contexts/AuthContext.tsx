@@ -24,7 +24,12 @@ interface AuthContextType {
   register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => void;
   connectGoogle: () => Promise<void>;
+  disconnectGoogle: () => Promise<void>;
   checkGoogleStatus: () => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -175,6 +180,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     browser.tabs.onRemoved.addListener(handleTabRemoved);
   };
 
+  const disconnectGoogle = async () => {
+    if (!token) throw new Error("Not authenticated");
+
+    await axios
+      .post(
+        `${API_BASE_URL}/google/disconnect`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .catch((error) => {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || "Failed to disconnect"
+          );
+        }
+        throw new Error("An unexpected error occurred");
+      });
+
+    setGoogleConnected(false);
+  };
+
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string
+  ) => {
+    if (!token) throw new Error("Not authenticated");
+
+    await axios
+      .post(
+        `${API_BASE_URL}/auth/change-password`,
+        { currentPassword, newPassword },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .catch((error) => {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || "Failed to change password"
+          );
+        }
+        throw new Error("An unexpected error occurred");
+      });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -186,7 +234,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         connectGoogle,
+        disconnectGoogle,
         checkGoogleStatus,
+        changePassword,
         isAuthenticated: !!user && !!token,
       }}
     >

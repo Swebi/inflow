@@ -55,6 +55,15 @@ export function scannedToFormData(data: ScannedEventResponse): EventFormData {
   };
 }
 
+export function humanizeKind(kind?: string | null): string {
+  if (!kind) return "";
+  return kind
+    .split("_")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function actionToEvent(action: RecentActionResponse): EventResponse {
   let date = "No due date";
   if (action.date) {

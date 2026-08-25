@@ -14,6 +14,11 @@ export const runEmailAgent = async (userId: string, messageId: string) => {
     if (actionId) actionIds.push(actionId);
   }
 
+  console.log(
+    `[agent:${messageId}] runEmailAgent: ${result.extractedItems?.length ?? 0} extracted, ` +
+      `${result.newItems?.length ?? 0} new, ${actionIds.length} PENDING action(s) created`
+  );
+
   return { ...result, actionIds };
 };
 

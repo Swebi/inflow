@@ -1,5 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { handleRegister, handleLogin, handleGetMe } from "../services/auth.service";
+import {
+  handleRegister,
+  handleLogin,
+  handleGetMe,
+  handleChangePassword,
+} from "../services/auth.service";
 import { AuthRequest, AppError } from "../types/schema";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -52,6 +57,42 @@ export const me = async (req: AuthRequest, res: Response, next: NextFunction) =>
       success: true,
       message: "User details fetched",
       data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) {
+      throw { statusCode: 401, message: "Unauthorized" } as AppError;
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      throw {
+        statusCode: 400,
+        message: "Current and new password are required",
+      } as AppError;
+    }
+    if (typeof newPassword !== "string" || newPassword.length < 8) {
+      throw {
+        statusCode: 400,
+        message: "New password must be at least 8 characters",
+      } as AppError;
+    }
+
+    await handleChangePassword(req.user.userId, currentPassword, newPassword);
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+      data: null,
     });
   } catch (error) {
     next(error);

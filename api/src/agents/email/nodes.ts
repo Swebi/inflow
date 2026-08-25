@@ -14,11 +14,21 @@ import { CreateEventData } from "../../types/schema";
 
 export const readEmail: typeof EmailExtractionState.Node = async (state) => {
   const emailContent = await handleGetMessage(state.userId, state.messageId);
+  console.log(
+    `[agent:${state.messageId}] readEmail: fetched ${emailContent.length} chars`
+  );
   return { emailContent };
 };
 
 export const extractItems: typeof EmailExtractionState.Node = async (state) => {
-  const extractedItems = await handleExtractEvents(state.emailContent ?? "");
+  const extractedItems = await handleExtractEvents(
+    state.emailContent ?? "",
+    state.messageId
+  );
+  console.log(
+    `[agent:${state.messageId}] extractItems: found ${extractedItems.length} candidate item(s)`,
+    extractedItems.map((e) => ({ title: e.title, date: e.date, kind: e.kind }))
+  );
   return { extractedItems };
 };
 
@@ -31,9 +41,23 @@ export const dedupe: typeof EmailExtractionState.Node = async (state) => {
       .map((a) => `${a.title.trim().toLowerCase()}|${a.date ?? ""}`)
   );
 
-  const newItems = (state.extractedItems ?? []).filter(
+  const extracted = state.extractedItems ?? [];
+  const newItems = extracted.filter(
     (item) =>
       !existingKeys.has(`${item.title.trim().toLowerCase()}|${item.date}`)
+  );
+  const skipped = extracted.filter((item) =>
+    existingKeys.has(`${item.title.trim().toLowerCase()}|${item.date}`)
+  );
+
+  console.log(
+    `[agent:${state.messageId}] dedupe: ${extracted.length} extracted, ` +
+      `${newItems.length} new, ${skipped.length} already tracked` +
+      (skipped.length
+        ? ` (skipped: ${skipped
+            .map((s) => `"${s.title}" @ ${s.date}`)
+            .join(", ")})`
+        : "")
   );
 
   return { newItems };

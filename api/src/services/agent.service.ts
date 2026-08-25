@@ -4,6 +4,10 @@ import { runEmailAgent } from "../agents/email/runner";
 
 export const handleScanUser = async (userId: string) => {
   const messageIds = await handleListNewMessages(userId);
+  console.log(
+    `[agent-scan] user ${userId}: ${messageIds.length} new message(s)`
+  );
+
   const results: { userId: string; messageId: string; ok: boolean }[] = [];
 
   for (const messageId of messageIds) {
@@ -16,6 +20,11 @@ export const handleScanUser = async (userId: string) => {
     }
   }
 
+  const ok = results.filter((r) => r.ok).length;
+  console.log(
+    `[agent-scan] user ${userId}: finished, ${ok}/${results.length} message(s) processed successfully`
+  );
+
   return results;
 };
 
@@ -26,23 +35,8 @@ export const handleScanAllUsers = async () => {
   });
 
   const results: { userId: string; messageId: string; ok: boolean }[] = [];
-
   for (const user of users) {
-    const messageIds = await handleListNewMessages(user.id);
-
-    for (const messageId of messageIds) {
-      try {
-        await runEmailAgent(user.id, messageId);
-        results.push({ userId: user.id, messageId, ok: true });
-      } catch (error) {
-        console.error("Agent run failed", {
-          userId: user.id,
-          messageId,
-          error,
-        });
-        results.push({ userId: user.id, messageId, ok: false });
-      }
-    }
+    results.push(...(await handleScanUser(user.id)));
   }
 
   return results;

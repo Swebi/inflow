@@ -12,7 +12,9 @@ export interface EventResponse {
 /** API response shape for one row from GET /api/actions */
 export interface RecentActionResponse {
   id: string;
-  type: "CALENDAR_EVENT" | "TASK";
+  type: "CALENDAR_EVENT" | "TASK" | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  kind?: string | null;
   addedBy: "USER" | "AGENT";
   title: string;
   date: string | null;
@@ -30,7 +32,7 @@ export interface ScannedEventResponse {
   startTime?: string | null;
   endTime?: string | null;
   notes?: string;
-  kind?: "registration_deadline" | "event" | "deadline" | "other";
+  kind?: string;
 }
 
 /** API response shape: { success, message, data: { events: ScannedEventResponse[] } } */
@@ -101,4 +103,5 @@ export interface HeaderProps {
   greeting: string;
   userName?: string;
   onLogout?: () => void;
+  onOpenSettings?: () => void;
 }

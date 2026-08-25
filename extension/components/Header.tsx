@@ -3,7 +3,12 @@ import { LogOut } from "lucide-react";
 import { HeaderProps } from "@/types/schema";
 import { Button } from "@/components/ui/button";
 
-export function Header({ greeting, userName = "User", onLogout }: HeaderProps) {
+export function Header({
+  greeting,
+  userName = "User",
+  onLogout,
+  onOpenSettings,
+}: HeaderProps) {
   return (
     <header className="px-5 pt-6 pb-4 flex items-center justify-between">
       <h1 className="text-2xl font-light text-slate-900">
@@ -23,9 +28,14 @@ export function Header({ greeting, userName = "User", onLogout }: HeaderProps) {
             <LogOut className="h-4 w-4" />
           </Button>
         )}
-        <div className="shadow-md rounded-full border-2 border-white">
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          title="Settings"
+          className="shadow-md rounded-full border-2 border-white"
+        >
           <Avatar name={userName} size={48} variant="beam" />
-        </div>
+        </button>
       </div>
     </header>
   );

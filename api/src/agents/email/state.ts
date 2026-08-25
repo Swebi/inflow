@@ -1,13 +1,19 @@
 import { StateSchema } from "@langchain/langgraph";
 import * as z from "zod";
 
-const ExtractedEventSchema = z.object({
+export const ExtractedEventSchema = z.object({
   title: z.string(),
   date: z.string(),
   startTime: z.string().nullable().optional(),
   endTime: z.string().nullable().optional(),
   notes: z.string().optional(),
   kind: z.string().optional(),
+});
+
+// Wrapped in an object because structured-output tool-calling requires an
+// object schema at the root — providers can't bind a bare array as a tool.
+export const ExtractedEventsSchema = z.object({
+  events: z.array(ExtractedEventSchema),
 });
 
 export const EmailExtractionState = new StateSchema({

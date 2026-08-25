@@ -9,6 +9,8 @@ import { EventsList } from "@/components/EventsList";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { EventEditDrawer } from "@/components/EventEditDrawer";
 import { GoogleConnectBanner } from "@/components/GoogleConnectBanner";
+import { SettingsDrawer } from "@/components/SettingsDrawer";
+import { PendingActionsSection } from "@/components/PendingActionsSection";
 import {
   EventResponse,
   ProcessEmailResponse,
@@ -24,7 +26,7 @@ export function Dashboard() {
   const [emailContent, setEmailContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [extracting, setExtracting] = useState(false);
-  const [events, setEvents] = useState<EventResponse[]>([]);
+  const [rawActions, setRawActions] = useState<RecentActionResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -32,6 +34,7 @@ export function Dashboard() {
   const [scannedEvents, setScannedEvents] = useState<
     ScannedEventResponse[] | null
   >(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Update time every minute
   useEffect(() => {
@@ -46,7 +49,7 @@ export function Dashboard() {
         `${API_BASE_URL}/actions`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setEvents(result.data.data.map(actionToEvent));
+      setRawActions(result.data.data);
     } catch (err) {
       console.error("Failed to fetch recent actions", err);
     }
@@ -215,6 +218,11 @@ export function Dashboard() {
     return "Good Evening";
   };
 
+  const pendingActions = rawActions.filter((a) => a.status === "PENDING");
+  const events = rawActions
+    .filter((a) => a.status === "APPROVED")
+    .map(actionToEvent);
+
   // Filter events by selected date when one is chosen
   const filteredEvents = selectedDate
     ? events.filter((e) => e.date === format(selectedDate, "dd.MM.yyyy"))
@@ -226,6 +234,7 @@ export function Dashboard() {
         greeting={getGreeting()}
         userName={user?.name || user?.email || "User"}
         onLogout={logout}
+        onOpenSettings={() => setSettingsOpen(true)}
       />
       <DateTimeCard
         currentTime={currentTime}
@@ -234,6 +243,10 @@ export function Dashboard() {
         onDateChange={setSelectedDate}
       />
       {!googleConnected && <GoogleConnectBanner />}
+      <PendingActionsSection
+        actions={pendingActions}
+        onResolved={fetchRecentActions}
+      />
       <EventsList
         events={filteredEvents}
         error={error}
@@ -255,6 +268,7 @@ export function Dashboard() {
         disabled={loading || extracting || !emailContent.trim()}
         loading={loading}
       />
+      <SettingsDrawer open={settingsOpen} onOpenChange={setSettingsOpen} />
     </div>
   );
 }
