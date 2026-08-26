@@ -80,16 +80,63 @@ export const handleListNewMessages = async (userId: string) => {
   return messageIds;
 };
 
+// Thrown when Gmail 404s on a specific message id — the email was deleted or
+// moved between being listed and being fetched. This is an expected,
+// non-actionable condition (not a bug), so callers should skip it quietly
+// rather than logging it like a real failure.
+export class MessageNotFoundError extends Error {
+  constructor(messageId: string) {
+    super(`Gmail message ${messageId} no longer exists`);
+    this.name = "MessageNotFoundError";
+  }
+}
+
+function getHeader(
+  headers: { name?: string | null; value?: string | null }[] | undefined,
+  name: string
+): string | undefined {
+  return (
+    headers?.find((h) => h.name?.toLowerCase() === name.toLowerCase())
+      ?.value ?? undefined
+  );
+}
+
 export const handleGetMessage = async (userId: string, messageId: string) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(userId);
   const gmailClient = getGmailClient(accessToken, refreshToken, expiryDate);
 
-  const response = await gmailClient.users.messages.get({
-    userId: "me",
-    id: messageId,
-    format: "full",
-  });
+  let response;
+  try {
+    response = await gmailClient.users.messages.get({
+      userId: "me",
+      id: messageId,
+      format: "full",
+    });
+  } catch (error: any) {
+    if (error?.code === 404) throw new MessageNotFoundError(messageId);
+    throw error;
+  }
 
-  return decodeBody(response.data.payload);
+  const headers = response.data.payload?.headers ?? undefined;
+  const subject = getHeader(headers, "Subject");
+  const from = getHeader(headers, "From");
+  // internalDate is Gmail's server-received timestamp (epoch ms) — more
+  // reliable than the From header's Date line, and gives the LLM a "today"
+  // anchor for resolving relative/year-less dates in the body (e.g. "next
+  // Monday", "March 15", "in two weeks").
+  const receivedAt = response.data.internalDate
+    ? new Date(Number(response.data.internalDate)).toISOString()
+    : undefined;
+
+  const body = decodeBody(response.data.payload);
+  const metadata = [
+    subject && `Subject: ${subject}`,
+    from && `From: ${from}`,
+    receivedAt && `Received: ${receivedAt}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return metadata ? `${metadata}\n\n${body}` : body;
 };

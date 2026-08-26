@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma";
-import { handleListNewMessages } from "./gmail.service";
+import { handleListNewMessages, MessageNotFoundError } from "./gmail.service";
 import { runEmailAgent } from "../agents/email/runner";
 
 export const handleScanUser = async (userId: string) => {
@@ -15,7 +15,14 @@ export const handleScanUser = async (userId: string) => {
       await runEmailAgent(userId, messageId);
       results.push({ userId, messageId, ok: true });
     } catch (error) {
-      console.error("Agent run failed", { userId, messageId, error });
+      if (error instanceof MessageNotFoundError) {
+        // Expected: message was deleted/moved between listing and fetching.
+        console.warn(
+          `[agent-scan] user ${userId}: message ${messageId} no longer exists, skipping`
+        );
+      } else {
+        console.error("Agent run failed", { userId, messageId, error });
+      }
       results.push({ userId, messageId, ok: false });
     }
   }
