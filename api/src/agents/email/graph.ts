@@ -4,7 +4,8 @@ import {
   readEmail,
   extractItems,
   dedupe,
-  notify,
+  sendNotification,
+  waitForDecision,
   resolveAction,
 } from "./nodes";
 import { checkpointer } from "./checkpointer";
@@ -20,9 +21,11 @@ export const extractionGraph = new StateGraph(EmailExtractionState)
   .compile();
 
 export const actionGraph = new StateGraph(ActionState)
-  .addNode("notify", notify)
+  .addNode("sendNotification", sendNotification)
+  .addNode("waitForDecision", waitForDecision)
   .addNode("resolveAction", resolveAction)
-  .addEdge(START, "notify")
-  .addEdge("notify", "resolveAction")
+  .addEdge(START, "sendNotification")
+  .addEdge("sendNotification", "waitForDecision")
+  .addEdge("waitForDecision", "resolveAction")
   .addEdge("resolveAction", END)
   .compile({ checkpointer });

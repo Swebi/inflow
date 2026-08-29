@@ -105,3 +105,9 @@ export interface HeaderProps {
   onLogout?: () => void;
   onOpenSettings?: () => void;
 }
+
+/** API response shape for GET /api/telegram/link */
+export interface TelegramLinkResponse {
+  linked: boolean;
+  deepLink: string;
+}

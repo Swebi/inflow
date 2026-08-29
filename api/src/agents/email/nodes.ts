@@ -7,6 +7,7 @@ import {
 } from "../../services/actions.service";
 import { handleCreateEvent } from "../../services/calendar.service";
 import { handleCreateTask } from "../../services/tasks.service";
+import { notifyIfLinked } from "../../services/telegram.service";
 import { EmailExtractionState, ActionState } from "./state";
 import { CreateEventData } from "../../types/schema";
 
@@ -20,11 +21,19 @@ export const readEmail: typeof EmailExtractionState.Node = async (state) => {
   return { emailContent };
 };
 
+// The extraction LLM emits dates as "dd.MM.yyyy" (see prompts/email.ts).
+// Actions are recorded and compared as ISO "yyyy-MM-dd" everywhere else in
+// the app (see extension's actionToEvent), so normalize right at the
+// boundary — every downstream node (dedupe, createAction, resolveAction,
+// the Google Calendar/Tasks APIs) then works with one consistent format.
+function toIsoDate(date: string): string {
+  const match = date.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : date;
+}
+
 export const extractItems: typeof EmailExtractionState.Node = async (state) => {
-  const extractedItems = await handleExtractEvents(
-    state.emailContent ?? "",
-    state.messageId
-  );
+  const raw = await handleExtractEvents(state.emailContent ?? "", state.messageId);
+  const extractedItems = raw.map((item) => ({ ...item, date: toIsoDate(item.date) }));
   console.log(
     `[agent:${state.messageId}] extractItems: found ${extractedItems.length} candidate item(s)`,
     extractedItems.map((e) => ({ title: e.title, date: e.date, kind: e.kind }))
@@ -65,7 +74,16 @@ export const dedupe: typeof EmailExtractionState.Node = async (state) => {
 
 // --- Graph B nodes ---
 
-export const notify: typeof ActionState.Node = async (state) => {
+// Split into two nodes deliberately: any code before interrupt() inside the
+// same node re-runs when the graph resumes (LangGraph replays the paused
+// node from its start). sendNotification is a separate, already-completed
+// node by the time we resume, so it won't re-fire and duplicate the message.
+export const sendNotification: typeof ActionState.Node = async (state) => {
+  await notifyIfLinked(state.userId, state.actionId, state.item);
+  return {};
+};
+
+export const waitForDecision: typeof ActionState.Node = async (state) => {
   const decision = interrupt({ item: state.item });
   return { decision };
 };
@@ -80,12 +98,13 @@ export const resolveAction: typeof ActionState.Node = async (state) => {
 
   const overrides = (decision.overrides ?? {}) as Record<string, unknown>;
   const asString = (v: unknown) => (typeof v === "string" ? v : undefined);
+  const date = asString(overrides.date) ?? item.date;
 
   if (decision.destination === "CALENDAR_EVENT") {
     await handleCreateEvent({
       userId,
       summary: asString(overrides.summary) ?? item.title,
-      date: asString(overrides.date) ?? item.date,
+      date,
       startTime: asString(overrides.startTime) ?? item.startTime ?? undefined,
       endTime: asString(overrides.endTime) ?? item.endTime ?? undefined,
       description: asString(overrides.notes) ?? item.notes,
@@ -101,7 +120,7 @@ export const resolveAction: typeof ActionState.Node = async (state) => {
       title:
         asString(overrides.title) ?? asString(overrides.summary) ?? item.title,
       notes: asString(overrides.notes) ?? item.notes,
-      dueDate: asString(overrides.date) ?? item.date,
+      dueDate: date,
       dueTime: asString(overrides.startTime) ?? item.startTime ?? undefined,
       existingActionId: actionId,
       addedBy: "AGENT",

@@ -19,6 +19,8 @@ model User {
     googleRefreshToken String?
     googleTokenExpiry  DateTime?
     lastGmailHistoryId String?
+    telegramChatId     String?   @unique
+    telegramLinkToken  String?   @unique
     createdAt          DateTime  @default(now())
     updatedAt          DateTime  @updatedAt
     actions            Action[]

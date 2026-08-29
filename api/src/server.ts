@@ -7,9 +7,11 @@ import { calendarRouter } from "./routers/calendar.router";
 import { tasksRouter } from "./routers/tasks.router";
 import { actionsRouter } from "./routers/actions.router";
 import { agentRouter } from "./routers/agent.router";
+import { telegramRouter } from "./routers/telegram.router";
 import { errorHandler } from "./middlewares/errorHandler";
 import { ensureCheckpointerSetup } from "./agents/email/checkpointer";
 import { startEmailScanJob } from "./jobs/email.job";
+import { bot } from "./services/telegram.service";
 
 import cors from "cors";
 
@@ -29,6 +31,7 @@ app.use("/api/calendar", calendarRouter);
 app.use("/api/tasks", tasksRouter);
 app.use("/api/actions", actionsRouter);
 app.use("/api/agent", agentRouter);
+app.use("/api/telegram", telegramRouter);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -42,6 +45,10 @@ ensureCheckpointerSetup()
       console.log(`Server is running on port ${PORT}`);
     });
     startEmailScanJob();
+    if (bot) {
+      bot.launch();
+      console.log("Telegram bot is polling for updates");
+    }
   })
   .catch((err) => {
     console.error("Failed to set up LangGraph checkpointer", err);

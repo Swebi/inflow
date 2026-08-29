@@ -15,6 +15,6 @@ export const EVENT_COLORS = {
 export type EventColorKey = keyof typeof EVENT_COLORS;
 export type EventColorId = (typeof EVENT_COLORS)[EventColorKey];
 
-export const DEFAULT_TIMEZONE = "UTC";
+export const DEFAULT_TIMEZONE = "Asia/Kolkata";
 
 export const APP_IDENTIFIER = "inflow";
