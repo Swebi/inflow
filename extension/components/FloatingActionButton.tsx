@@ -6,11 +6,12 @@ export function FloatingActionButton({
   loading,
 }: FloatingActionButtonProps) {
   return (
-    <div className="fixed bottom-6 right-6">
+    <div className="absolute bottom-4 right-4">
       <button
         onClick={onClick}
         disabled={disabled}
-        className="w-14 h-14 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+        aria-label="Scan this email"
+        className="w-14 h-14 bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-40 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
       >
         {loading ? (
           <svg

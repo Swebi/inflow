@@ -1,5 +1,22 @@
-import { parse, format, addHours, subHours } from "date-fns";
+import { parse, format, addHours, subHours, isValid } from "date-fns";
 import { EventResponse, RecentActionResponse, ScannedEventResponse } from "@/types/schema";
+
+/**
+ * One human date format for every surface: "Sep 24", or "Sep 24, 2027" when the
+ * year isn't the current one. Tolerates the two stored shapes we get from the
+ * API ("yyyy-MM-dd") and from scanned events ("dd.MM.yyyy").
+ */
+export function formatHumanDate(raw?: string | null): string {
+  if (!raw) return "No date";
+  for (const pattern of ["yyyy-MM-dd", "dd.MM.yyyy"]) {
+    const parsed = parse(raw, pattern, new Date());
+    if (isValid(parsed)) {
+      const sameYear = parsed.getFullYear() === new Date().getFullYear();
+      return format(parsed, sameYear ? "MMM d" : "MMM d, yyyy");
+    }
+  }
+  return raw;
+}
 
 export function parseTimeToHHmm(time: string): string {
   const [h, m] = time.split(":").map((s) => parseInt(s, 10) || 0);
@@ -55,13 +72,86 @@ export function scannedToFormData(data: ScannedEventResponse): EventFormData {
   };
 }
 
-export function humanizeKind(kind?: string | null): string {
+/**
+ * A badge's category label. Raw `kind` values from extraction are all over
+ * the place ("event", "registration_deadline", "food delivery") — in a list
+ * that scans 15-20+ rows the badge only works if the vocabulary is small and
+ * every label is one short word. Map the known kinds to that vocabulary;
+ * fall back to the first token so an unknown kind still stays one word.
+ */
+const KIND_LABELS: Record<string, string> = {
+  login: "Login",
+  signin: "Login",
+  sign_in: "Login",
+  verification: "Login",
+  verify: "Login",
+  otp: "Login",
+  "2fa": "Login",
+  password_reset: "Login",
+  security_alert: "Login",
+  account: "Login",
+
+  deadline: "Deadline",
+  registration_deadline: "Deadline",
+  submission_deadline: "Deadline",
+  application_deadline: "Deadline",
+  payment_deadline: "Deadline",
+  due: "Deadline",
+  due_date: "Deadline",
+  expiry: "Deadline",
+  expiration: "Deadline",
+
+  event: "Event",
+  meeting: "Event",
+  webinar: "Event",
+  appointment: "Event",
+  call: "Event",
+  conference: "Event",
+  invite: "Event",
+  invitation: "Event",
+
+  promo: "Promo",
+  promotion: "Promo",
+  sale: "Promo",
+  offer: "Promo",
+  discount: "Promo",
+  deal: "Promo",
+  marketing: "Promo",
+  newsletter: "Promo",
+
+  delivery: "Delivery",
+  shipment: "Delivery",
+  shipping: "Delivery",
+  order: "Delivery",
+  dispatch: "Delivery",
+
+  release: "Release",
+  launch: "Release",
+  announcement: "Release",
+
+  reminder: "Reminder",
+
+  bill: "Bill",
+  invoice: "Bill",
+  payment: "Bill",
+  receipt: "Bill",
+  subscription: "Bill",
+
+  travel: "Travel",
+  flight: "Travel",
+  booking: "Travel",
+  reservation: "Travel",
+  itinerary: "Travel",
+  checkin: "Travel",
+  check_in: "Travel",
+};
+
+export function kindLabel(kind?: string | null): string {
   if (!kind) return "";
-  return kind
-    .split("_")
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+  const key = kind.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (KIND_LABELS[key]) return KIND_LABELS[key];
+  const first = key.split("_").filter(Boolean)[0] ?? "";
+  return first ? first.charAt(0).toUpperCase() + first.slice(1) : "";
 }
 
 export function actionToEvent(action: RecentActionResponse): EventResponse {
@@ -85,6 +175,7 @@ export function actionToEvent(action: RecentActionResponse): EventResponse {
     date,
     time,
     notes: action.notes ?? undefined,
+    kind: action.kind ?? undefined,
     source: action.type === "TASK" ? "google-tasks" : "google-calendar",
   };
 }

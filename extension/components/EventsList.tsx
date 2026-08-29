@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { FilterType, EventsListProps } from "@/types/schema";
 import { EventCard } from "./EventCard";
-import calendarIcon from "@/assets/calendar.svg";
-import tasksIcon from "@/assets/tasks.svg";
-import { AlertCircle, Mail } from "lucide-react";
+import { AlertCircle, Calendar, ListTodo, Mail } from "lucide-react";
 import {
   Empty,
   EmptyHeader,
@@ -30,6 +28,8 @@ export function EventsList({
 
   const filterBtn =
     "text-sm font-medium px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5";
+  const filterActive = "bg-slate-200 text-slate-900";
+  const filterIdle = "text-slate-500 hover:bg-slate-100";
 
   const emptyDescription = () => {
     if (selectedDate && events.length === 0) {
@@ -41,15 +41,13 @@ export function EventsList({
   };
 
   return (
-    <div className="flex-1 px-4 pb-24">
+    <div className="px-4 pb-24">
       <div className="flex items-center gap-2 mb-4">
         <button
           type="button"
           onClick={() => setActiveFilter("recents")}
           className={`${filterBtn} ${
-            activeFilter === "recents"
-              ? "bg-slate-800 text-white"
-              : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
+            activeFilter === "recents" ? filterActive : filterIdle
           }`}
         >
           Recents
@@ -58,32 +56,28 @@ export function EventsList({
           type="button"
           onClick={() => setActiveFilter("calendar")}
           className={`${filterBtn} ${
-            activeFilter === "calendar"
-              ? "bg-slate-800 text-white"
-              : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
+            activeFilter === "calendar" ? filterActive : filterIdle
           }`}
         >
-          <img src={calendarIcon} alt="" className="w-4 h-4" aria-hidden />
+          <Calendar className="size-4" aria-hidden />
           Calendar
         </button>
         <button
           type="button"
           onClick={() => setActiveFilter("tasks")}
           className={`${filterBtn} ${
-            activeFilter === "tasks"
-              ? "bg-slate-800 text-white"
-              : "bg-slate-200/60 text-slate-600 hover:bg-slate-200"
+            activeFilter === "tasks" ? filterActive : filterIdle
           }`}
         >
-          <img src={tasksIcon} alt="" className="w-4 h-4" aria-hidden />
+          <ListTodo className="size-4" aria-hidden />
           Tasks
         </button>
       </div>
 
       {error && !extracting && (
-        <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl mb-4">
-          <AlertCircle className="size-4 text-amber-600 mt-0.5 shrink-0" />
-          <p className="text-sm text-amber-800">{error}</p>
+        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4">
+          <AlertCircle className="size-4 text-red-600 mt-0.5 shrink-0" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
@@ -93,27 +87,25 @@ export function EventsList({
             <EmptyMedia variant="icon" className="size-16 rounded-full bg-slate-100 mb-2">
               <Mail className="size-8 text-slate-600" />
             </EmptyMedia>
-            <EmptyTitle className="text-xl font-semibold text-slate-900 mb-2">
+            <EmptyTitle className="type-title mb-1.5">
               No actions yet
             </EmptyTitle>
-            <EmptyDescription className="text-slate-500">
+            <EmptyDescription className="type-body">
               {emptyDescription()}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {filteredEvents.map((event, index) => (
           <EventCard key={event.id ?? index} event={event} variant="light" />
         ))}
       </div>
 
       {showSuccess && (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-          <p className="text-sm text-blue-700 font-medium">
-            Event added successfully!
-          </p>
+        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+          <p className="text-sm text-green-700 font-medium">Event added</p>
         </div>
       )}
     </div>

@@ -1,42 +1,28 @@
 import Avatar from "boring-avatars";
-import { LogOut } from "lucide-react";
 import { HeaderProps } from "@/types/schema";
-import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/BrandMark";
 
 export function Header({
   greeting,
   userName = "User",
-  onLogout,
   onOpenSettings,
 }: HeaderProps) {
   return (
-    <header className="px-5 pt-6 pb-4 flex items-center justify-between">
-      <h1 className="text-2xl font-light text-slate-900">
-        {greeting}
-        <br />
-        <span className="text-slate-900 font-semibold">{userName}</span>
+    <header className="flex items-center gap-2.5 px-4 pb-3 pt-4">
+      <BrandMark className="shrink-0" />
+      <span className="h-4 w-px shrink-0 bg-slate-200" aria-hidden="true" />
+      <h1 className="type-meta min-w-0 flex-1 truncate">
+        {greeting}, {userName}
       </h1>
-      <div className="flex items-center gap-3">
-        {onLogout && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onLogout}
-            title="Logout"
-            className="h-9 w-9"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        )}
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          title="Settings"
-          className="shadow-md rounded-full border-2 border-white"
-        >
-          <Avatar name={userName} size={48} variant="beam" />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        title="Settings"
+        aria-label="Settings"
+        className="shrink-0 rounded-full border-2 border-white shadow-md"
+      >
+        <Avatar name={userName} size={30} variant="beam" />
+      </button>
     </header>
   );
 }

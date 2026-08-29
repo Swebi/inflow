@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar, ListTodo, type LucideIcon } from "lucide-react";
 import axios from "axios";
 
 import {
@@ -12,10 +12,9 @@ import {
   DrawerScreen,
   EventEditDrawerProps,
 } from "@/types/schema";
-import { scannedToFormData, humanizeKind } from "@/utils/event";
+import { scannedToFormData, kindLabel, formatHumanDate } from "@/utils/event";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import calendarIcon from "@/assets/calendar.svg";
-import tasksIcon from "@/assets/tasks.svg";
 import { Button } from "./ui/button";
 import { DatePicker } from "./ui/date-picker";
 import {
@@ -39,9 +38,9 @@ import { cn } from "@/lib/utils";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
-const SOURCE_OPTIONS: { value: EventSource; label: string; icon: string }[] = [
-  { value: "google-calendar", label: "Calendar", icon: calendarIcon },
-  { value: "google-tasks", label: "Tasks", icon: tasksIcon },
+const SOURCE_OPTIONS: { value: EventSource; label: string; icon: LucideIcon }[] = [
+  { value: "google-calendar", label: "Calendar", icon: Calendar },
+  { value: "google-tasks", label: "Tasks", icon: ListTodo },
 ];
 
 const defaultFormData: EventFormData = {
@@ -204,7 +203,7 @@ export function EventEditDrawer({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-blue-50 hover:text-slate-900"
+              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               aria-label={screen === "picker" ? "Close" : "Back"}
               onClick={screen === "picker" ? handlePickerClose : handleBack}
             >
@@ -225,20 +224,14 @@ export function EventEditDrawer({
                 <button
                   key={i}
                   type="button"
-                  className="flex w-full flex-col gap-1 rounded-2xl border border-slate-100 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow active:bg-slate-50"
+                  className="surface-card flex w-full flex-col gap-1.5 p-4 text-left transition-shadow hover:shadow-md active:bg-slate-50"
                   onClick={() => handlePick(ev)}
                 >
-                  <p className="font-semibold text-base text-slate-900">
-                    {ev.title}
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    {ev.date}
-                    {ev.kind && (
-                      <span className="ml-1.5">
-                        · {humanizeKind(ev.kind)}
-                      </span>
-                    )}
-                  </p>
+                  <p className="type-title line-clamp-2">{ev.title}</p>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="type-meta">{formatHumanDate(ev.date)}</span>
+                    {ev.kind && <Badge>{kindLabel(ev.kind)}</Badge>}
+                  </div>
                 </button>
               ))}
             </div>
@@ -263,7 +256,7 @@ export function EventEditDrawer({
                     value={form.title}
                     onChange={(e) => update({ title: e.target.value })}
                     placeholder="Event title"
-                    className="border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:border-blue-500 focus-visible:ring-blue-200"
+                    className="border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/30"
                   />
                 </div>
 
@@ -277,7 +270,7 @@ export function EventEditDrawer({
                     onChange={(e) => update({ description: e.target.value })}
                     placeholder="Event description"
                     rows={2}
-                    className="border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:border-blue-500 focus-visible:ring-blue-200"
+                    className="border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/30"
                   />
                 </div>
 
@@ -291,7 +284,7 @@ export function EventEditDrawer({
                   >
                     <SelectTrigger
                       id="source"
-                      className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 data-placeholder:text-slate-400 focus-visible:border-blue-500 focus-visible:ring-blue-200"
+                      className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 data-placeholder:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/30"
                     >
                       <SelectValue placeholder="Select source" />
                     </SelectTrigger>
@@ -300,14 +293,9 @@ export function EventEditDrawer({
                         <SelectItem
                           key={opt.value}
                           value={opt.value}
-                          className="focus:bg-blue-50 focus:text-slate-900"
+                          className="focus:bg-slate-100 focus:text-slate-900"
                         >
-                          <img
-                            src={opt.icon}
-                            alt=""
-                            className="size-4 shrink-0"
-                            aria-hidden
-                          />
+                          <opt.icon className="size-4 shrink-0" aria-hidden />
                           {opt.label}
                         </SelectItem>
                       ))}
@@ -323,14 +311,14 @@ export function EventEditDrawer({
                         value={form.dueDate}
                         onChange={(d) => d && update({ dueDate: d })}
                         placeholder="Date"
-                        className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 data-[empty=true]:text-slate-400 focus-visible:border-blue-500 focus-visible:ring-blue-200"
+                        className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 data-[empty=true]:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/30"
                         popoverClassName="border-slate-200 bg-white shadow-lg"
                       />
                       <Input
                         type="time"
                         value={form.dueTime}
                         onChange={(e) => update({ dueTime: e.target.value })}
-                        className="border-slate-200 bg-white text-slate-900 focus-visible:border-blue-500 focus-visible:ring-blue-200 min-w-[100px]"
+                        className="border-slate-200 bg-white text-slate-900 focus-visible:border-accent focus-visible:ring-accent/30 min-w-[100px]"
                       />
                     </div>
                   </div>
@@ -343,7 +331,7 @@ export function EventEditDrawer({
                           value={form.startDate}
                           onChange={(d) => d && update({ startDate: d })}
                           placeholder="Date"
-                          className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 data-[empty=true]:text-slate-400 focus-visible:border-blue-500 focus-visible:ring-blue-200"
+                          className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 data-[empty=true]:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/30"
                           popoverClassName="border-slate-200 bg-white shadow-lg"
                         />
                         <Input
@@ -352,7 +340,7 @@ export function EventEditDrawer({
                           onChange={(e) =>
                             update({ startTime: e.target.value })
                           }
-                          className="border-slate-200 bg-white text-slate-900 focus-visible:border-blue-500 focus-visible:ring-blue-200 min-w-[100px]"
+                          className="border-slate-200 bg-white text-slate-900 focus-visible:border-accent focus-visible:ring-accent/30 min-w-[100px]"
                         />
                       </div>
                     </div>
@@ -363,14 +351,14 @@ export function EventEditDrawer({
                           value={form.endDate}
                           onChange={(d) => d && update({ endDate: d })}
                           placeholder="Date"
-                          className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 data-[empty=true]:text-slate-400 focus-visible:border-blue-500 focus-visible:ring-blue-200"
+                          className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 data-[empty=true]:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/30"
                           popoverClassName="border-slate-200 bg-white shadow-lg"
                         />
                         <Input
                           type="time"
                           value={form.endTime}
                           onChange={(e) => update({ endTime: e.target.value })}
-                          className="border-slate-200 bg-white text-slate-900 focus-visible:border-blue-500 focus-visible:ring-blue-200 min-w-[100px]"
+                          className="border-slate-200 bg-white text-slate-900 focus-visible:border-accent focus-visible:ring-accent/30 min-w-[100px]"
                         />
                       </div>
                     </div>
@@ -389,7 +377,7 @@ export function EventEditDrawer({
               <Button
                 type="submit"
                 form="event-edit-form"
-                className="w-full bg-slate-800 text-white hover:bg-slate-900 disabled:bg-slate-300 disabled:text-slate-500"
+                className="w-full bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-40"
                 disabled={saving || !form.title.trim()}
               >
                 {saving ? "Saving…" : "Save"}

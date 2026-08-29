@@ -57,8 +57,10 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* The one accent, used sparingly: primary CTA + the single "selected"/
+     "due now" state. Everything else on screen is neutral slate. */
+  --accent: oklch(0.55 0.176 262);
+  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -91,7 +93,7 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.62 0.17 262);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
@@ -119,6 +121,18 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+  /* Hide scrollbars app-wide — scrolling still works, the panel just never
+     shows a track. Chrome side panel is WebKit, so the ::-webkit rule is the
+     one that matters here; the other two keep it consistent elsewhere. */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
   h1,
   h2,
   h3,
@@ -126,5 +140,49 @@
   h5,
   h6 {
     @apply font-heading;
+  }
+}
+
+/* --- Type system -----------------------------------------------------------
+   Four roles. Every text element in the panel maps to exactly one of these,
+   on purpose — don't reach for ad hoc size/weight/color combos in components.
+
+   - type-title : primary content. The date card's day label, empty-state
+                  headline, settings section that names the whole surface.
+                  Poppins, the only place weight goes above 500.
+   - type-item-title : one row in a scannable list (suggestion cards, event
+                  cards). Deliberately a step down from type-title in size and
+                  weight — it's a list item, not a headline competing with the
+                  header.
+   - type-body  : running prose. Suggestion notes, empty-state description.
+   - type-label : structural labels / section eyebrows ("Needs review").
+                  Not content — it names a region.
+   - type-meta  : inline metadata. Dates, times, counts, source hints.
+
+   Color stays in the slate family; accent is never used here (accent means
+   "this needs you", not "this is text").
+--------------------------------------------------------------------------- */
+@layer components {
+  .type-title {
+    @apply font-heading text-[14px] font-semibold leading-snug text-slate-900;
+  }
+  .type-item-title {
+    @apply font-heading text-[13px] font-medium leading-snug text-slate-900;
+  }
+  .type-body {
+    @apply font-sans text-[13px] font-normal leading-relaxed text-slate-500;
+  }
+  .type-label {
+    @apply font-sans text-[11px] font-semibold tracking-[0.04em] text-slate-500;
+  }
+  .type-meta {
+    @apply font-sans text-[12px] font-medium text-slate-500;
+  }
+
+  /* One card surface, used everywhere a white surface sits on the slate-100
+     page: date card, suggestion cards, event cards, connect banner. Cards
+     lift off the page with a shadow, not just a border. */
+  .surface-card {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm;
   }
 }

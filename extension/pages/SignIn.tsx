@@ -32,8 +32,8 @@ export function SignIn() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold text-center mb-6">Sign In</h1>
-          
+          <h1 className="text-2xl font-bold text-center mb-6">Sign in</h1>
+
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
               {error}
@@ -69,18 +69,18 @@ export function SignIn() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
               disabled={loading}
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-6 text-center text-sm text-slate-500">
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="text-primary hover:underline font-medium"
+              className="text-accent hover:underline font-medium"
             >
               Sign up
             </Link>

@@ -6,6 +6,7 @@ export interface EventResponse {
   date: string;
   time?: string;
   notes?: string;
+  kind?: string;
   source: EventSource;
 }
 
@@ -102,7 +103,6 @@ export interface FloatingActionButtonProps {
 export interface HeaderProps {
   greeting: string;
   userName?: string;
-  onLogout?: () => void;
   onOpenSettings?: () => void;
 }
 

@@ -3,9 +3,14 @@ import axios from "axios";
 import { Loader2, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { RecentActionResponse } from "@/types/schema";
-import { humanizeKind } from "@/utils/event";
+import { formatHumanDate, kindLabel } from "@/utils/event";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { outlineButton, outlineButtonCompact } from "@/lib/styles";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
+
+const actionButton = cn(outlineButton, outlineButtonCompact, "flex-1");
 
 const API_BASE_URL = "http://localhost:8000/api";
 
@@ -60,20 +65,16 @@ export function PendingActionCard({ action, onResolved }: PendingActionCardProps
   };
 
   return (
-    <div className="rounded-2xl bg-white border border-amber-200 shadow-sm p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-base text-slate-900 truncate">
-            {action.title}
-          </h3>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {action.date ?? "No date"}
-            {action.kind && (
-              <span className="ml-1.5">· {humanizeKind(action.kind)}</span>
-            )}
-          </p>
+    <div className="surface-card p-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="type-item-title line-clamp-2">{action.title}</h3>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <span className="type-meta">{formatHumanDate(action.date)}</span>
+            {action.kind && <Badge>{kindLabel(action.kind)}</Badge>}
+          </div>
           {action.notes && (
-            <p className="text-sm text-slate-400 mt-1 line-clamp-2">
+            <p className="type-body mt-1 line-clamp-1 text-slate-400">
               {action.notes}
             </p>
           )}
@@ -83,33 +84,33 @@ export function PendingActionCard({ action, onResolved }: PendingActionCardProps
           onClick={reject}
           disabled={busy !== null}
           aria-label="Reject"
-          className="shrink-0 size-7 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50"
+          className="flex size-6 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50"
         >
           {busy === "reject" ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-3.5 animate-spin" />
           ) : (
-            <X className="size-4" />
+            <X className="size-3.5" />
           )}
         </button>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 rounded-lg bg-red-50 px-3 py-2 mt-3">
+        <p className="mt-2.5 rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-600">
           {error}
         </p>
       )}
 
-      <div className="flex items-center gap-2 mt-3">
+      <div className="mt-2.5 flex items-center gap-2">
         <button
           type="button"
           onClick={() => approve("CALENDAR_EVENT")}
           disabled={busy !== null}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 text-white text-sm font-medium py-2 hover:bg-slate-900 disabled:opacity-50"
+          className={actionButton}
         >
           {busy === "CALENDAR_EVENT" ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-3 animate-spin" />
           ) : (
-            <img src={calendarIcon} alt="" className="size-4" aria-hidden />
+            <img src={calendarIcon} alt="" className="size-3.5" aria-hidden />
           )}
           Calendar
         </button>
@@ -117,12 +118,12 @@ export function PendingActionCard({ action, onResolved }: PendingActionCardProps
           type="button"
           onClick={() => approve("TASK")}
           disabled={busy !== null}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 text-slate-800 text-sm font-medium py-2 hover:bg-slate-200 disabled:opacity-50"
+          className={actionButton}
         >
           {busy === "TASK" ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-3 animate-spin" />
           ) : (
-            <img src={tasksIcon} alt="" className="size-4" aria-hidden />
+            <img src={tasksIcon} alt="" className="size-3.5" aria-hidden />
           )}
           Task
         </button>

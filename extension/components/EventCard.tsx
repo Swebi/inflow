@@ -1,4 +1,6 @@
-import { EventResponse, EventCardProps } from "@/types/schema";
+import { EventCardProps } from "@/types/schema";
+import { formatHumanDate, kindLabel } from "@/utils/event";
+import { Badge } from "@/components/ui/badge";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
 
@@ -20,56 +22,52 @@ function formatTimeDisplay(time: string): string {
 
 export function EventCard({ event, variant }: EventCardProps) {
   const isLight = variant === "light";
-  const sourceIcon =
-    event.source === "google-calendar" ? calendarIcon : tasksIcon;
+  const isCalendar = event.source === "google-calendar";
 
   return (
     <div
-      className={`rounded-2xl p-4 transition-shadow ${
+      className={
         isLight
-          ? "bg-white shadow-sm border border-slate-100 hover:shadow"
-          : "bg-slate-800 border border-slate-700"
-      }`}
+          ? "surface-card p-3 transition-shadow hover:shadow-md"
+          : "rounded-2xl border border-slate-700 bg-slate-800 p-3"
+      }
     >
-      <div className="flex flex-col">
-        <div className="flex items-start justify-between gap-3">
-          <h3
-            className={`font-semibold text-base flex-1 ${
-              isLight ? "text-slate-900" : "text-white"
-            }`}
+      <div className="flex items-start justify-between gap-2">
+        <h3
+          className={
+            isLight
+              ? "type-item-title line-clamp-2 flex-1"
+              : "flex-1 line-clamp-2 font-heading text-[13px] font-medium leading-snug text-white"
+          }
+        >
+          {event.title}
+        </h3>
+        <img
+          src={isCalendar ? calendarIcon : tasksIcon}
+          alt={isCalendar ? "Google Calendar" : "Google Tasks"}
+          className="mt-0.5 size-4 shrink-0"
+        />
+      </div>
+      <div className="mt-1.5 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span
+            className={isLight ? "type-meta" : "text-[12px] text-slate-300"}
           >
-            {event.title}
-          </h3>
-          <div className="shrink-0 opacity-100">
-            <img
-              src={sourceIcon}
-              alt={
-                event.source === "google-calendar"
-                  ? "Google Calendar"
-                  : "Google Tasks"
-              }
-              className="w-5 h-5"
-            />
-          </div>
+            {formatHumanDate(event.date)}
+          </span>
+          {event.kind && isLight && <Badge>{kindLabel(event.kind)}</Badge>}
         </div>
-        <div className="flex items-center justify-between mt-1">
-          <p
-            className={`text-sm ${
-              isLight ? "text-slate-500" : "text-slate-300"
-            }`}
+        {event.time && (
+          <span
+            className={
+              isLight
+                ? "type-meta shrink-0"
+                : "shrink-0 text-[12px] text-slate-300"
+            }
           >
-            {event.date}
-          </p>
-          {event.time && (
-            <p
-              className={`text-sm ${
-                isLight ? "text-slate-500" : "text-slate-300"
-              }`}
-            >
-              {formatTimeDisplay(event.time)}
-            </p>
-          )}
-        </div>
+            {formatTimeDisplay(event.time)}
+          </span>
+        )}
       </div>
     </div>
   );

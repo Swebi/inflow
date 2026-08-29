@@ -14,13 +14,13 @@ export function PendingActionsSection({
 
   return (
     <div className="px-4 pb-2">
-      <h2 className="text-sm font-semibold text-slate-700 mb-2">
+      <h2 className="type-label mb-2">
         Needs review
-        <span className="ml-1.5 text-slate-400 font-normal">
+        <span className="ml-1.5 font-normal text-slate-400">
           ({actions.length})
         </span>
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {actions.map((action) => (
           <PendingActionCard
             key={action.id}

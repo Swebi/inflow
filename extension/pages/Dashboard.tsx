@@ -22,7 +22,7 @@ import { actionToEvent } from "@/utils/event";
 const API_BASE_URL = "http://localhost:8000/api";
 
 export function Dashboard() {
-  const { user, token, logout, googleConnected } = useAuth();
+  const { user, token, googleConnected } = useAuth();
   const [emailContent, setEmailContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [extracting, setExtracting] = useState(false);
@@ -213,9 +213,9 @@ export function Dashboard() {
 
   const getGreeting = () => {
     const hour = currentTime.getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
   };
 
   const pendingActions = rawActions.filter((a) => a.status === "PENDING");
@@ -229,31 +229,34 @@ export function Dashboard() {
     : events;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-slate-100">
       <Header
         greeting={getGreeting()}
         userName={user?.name || user?.email || "User"}
-        onLogout={logout}
         onOpenSettings={() => setSettingsOpen(true)}
       />
-      <DateTimeCard
-        currentTime={currentTime}
-        eventsCount={filteredEvents.length}
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-      />
-      {!googleConnected && <GoogleConnectBanner />}
-      <PendingActionsSection
-        actions={pendingActions}
-        onResolved={fetchRecentActions}
-      />
-      <EventsList
-        events={filteredEvents}
-        error={error}
-        extracting={extracting}
-        showSuccess={false}
-        selectedDate={selectedDate}
-      />
+      {/* min-h-0 lets this flex child actually shrink and scroll internally
+          instead of growing to fit content and getting clipped by the root. */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <DateTimeCard
+          currentTime={currentTime}
+          eventsCount={filteredEvents.length}
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+        />
+        {!googleConnected && <GoogleConnectBanner />}
+        <PendingActionsSection
+          actions={pendingActions}
+          onResolved={fetchRecentActions}
+        />
+        <EventsList
+          events={filteredEvents}
+          error={error}
+          extracting={extracting}
+          showSuccess={false}
+          selectedDate={selectedDate}
+        />
+      </div>
       <EventEditDrawer
         open={drawerOpen}
         onOpenChange={(open) => {

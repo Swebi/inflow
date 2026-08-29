@@ -33,8 +33,8 @@ export function SignUp() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold text-center mb-6">Sign Up</h1>
-          
+          <h1 className="text-2xl font-bold text-center mb-6">Sign up</h1>
+
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
               {error}
@@ -43,7 +43,7 @@ export function SignUp() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name (Optional)</Label>
+              <Label htmlFor="name">Name (optional)</Label>
               <Input
                 id="name"
                 type="text"
@@ -82,18 +82,18 @@ export function SignUp() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
               disabled={loading}
             >
-              {loading ? "Signing up..." : "Sign Up"}
+              {loading ? "Signing up…" : "Sign up"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-6 text-center text-sm text-slate-500">
             Already have an account?{" "}
             <Link
               to="/signin"
-              className="text-primary hover:underline font-medium"
+              className="text-accent hover:underline font-medium"
             >
               Sign in
             </Link>

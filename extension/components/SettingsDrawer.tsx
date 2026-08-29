@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { browser } from "wxt/browser";
-import { CheckCircle2, RefreshCw, Send, Unlink } from "lucide-react";
+import { CheckCircle2, LogOut, RefreshCw, Send, Unlink } from "lucide-react";
+import Avatar from "boring-avatars";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { TelegramLinkResponse } from "@/types/schema";
+import { cn } from "@/lib/utils";
+import { outlineButton, quietDestructiveButton } from "@/lib/styles";
 import { Button } from "./ui/button";
 import {
   Drawer,
@@ -18,14 +21,36 @@ import { Label } from "./ui/label";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
+/** "Connected" / "Not connected" for the Google + Telegram section cards. */
+function ConnectionStatus({ connected }: { connected: boolean }) {
+  return connected ? (
+    <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-700">
+      <CheckCircle2 className="size-4 shrink-0 text-green-600" />
+      Connected
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-400">
+      <span className="size-1.5 rounded-full bg-slate-300" aria-hidden />
+      Not connected
+    </span>
+  );
+}
+
 interface SettingsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
-  const { user, token, googleConnected, connectGoogle, disconnectGoogle, changePassword } =
-    useAuth();
+  const {
+    user,
+    token,
+    googleConnected,
+    connectGoogle,
+    disconnectGoogle,
+    changePassword,
+    logout,
+  } = useAuth();
 
   const [googleBusy, setGoogleBusy] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
@@ -143,102 +168,105 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
     }
   };
 
+  const handleLogout = () => {
+    onOpenChange(false);
+    logout();
+  };
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Settings</DrawerTitle>
-          <DrawerDescription>{user?.email}</DrawerDescription>
+        <DrawerHeader className="border-b border-slate-200/70">
+          <DrawerTitle className="type-title text-[15px]">Settings</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            Manage your account, connections, and password.
+          </DrawerDescription>
         </DrawerHeader>
 
-        <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-8">
-          <section className="space-y-2">
-            <h3 className="text-sm font-medium text-slate-900">
-              Google Account
-            </h3>
-            <div className="flex flex-col gap-3 rounded-lg border border-slate-200 p-3">
-              <div className="flex items-center gap-2 text-sm">
-                {googleConnected ? (
-                  <>
-                    <CheckCircle2 className="size-4 shrink-0 text-green-600" />
-                    <span className="text-slate-700">Connected</span>
-                  </>
-                ) : (
-                  <span className="text-slate-500">Not connected</span>
+        <div className="divide-y divide-slate-200/70 overflow-y-auto px-4 pb-8">
+          {/* Account -------------------------------------------------------- */}
+          <section className="space-y-2.5 py-5">
+            <h3 className="type-label">Account</h3>
+            <div className="flex items-center gap-3">
+              <span className="shrink-0 rounded-full border-2 border-white shadow-md">
+                <Avatar
+                  name={user?.name || user?.email || "User"}
+                  size={40}
+                  variant="beam"
+                />
+              </span>
+              <div className="min-w-0">
+                {user?.name && (
+                  <p className="type-item-title truncate">{user.name}</p>
                 )}
+                <p className="type-meta truncate">{user?.email}</p>
               </div>
+            </div>
+          </section>
+
+          {/* Google connection ------------------------------------------------ */}
+          <section className="space-y-2.5 py-5">
+            <h3 className="type-label">Google connection</h3>
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <ConnectionStatus connected={googleConnected} />
               <div className="flex gap-2">
                 {googleConnected && (
-                  <Button
-                    size="sm"
-                    variant="outline"
+                  <button
+                    type="button"
                     onClick={handleDisconnect}
                     disabled={googleBusy}
-                    className="flex-1"
+                    className={cn(outlineButton, "flex-1")}
                   >
                     <Unlink className="size-3.5" />
                     Disconnect
-                  </Button>
+                  </button>
                 )}
-                <Button
-                  size="sm"
-                  variant="secondary"
+                <button
+                  type="button"
                   onClick={handleReconnect}
                   disabled={googleBusy}
-                  className="flex-1"
+                  className={cn(outlineButton, "flex-1")}
                 >
                   <RefreshCw className="size-3.5" />
                   {googleConnected ? "Reconnect" : "Connect"}
-                </Button>
+                </button>
               </div>
             </div>
-            {googleError && (
-              <p className="text-xs text-red-600">{googleError}</p>
-            )}
+            {googleError && <p className="text-xs text-red-600">{googleError}</p>}
           </section>
 
-          <section className="space-y-2">
-            <h3 className="text-sm font-medium text-slate-900">
-              Telegram Notifications
-            </h3>
-            <div className="flex flex-col gap-3 rounded-lg border border-slate-200 p-3">
-              <div className="flex items-center gap-2 text-sm">
-                {telegramStatus?.linked ? (
-                  <>
-                    <CheckCircle2 className="size-4 shrink-0 text-green-600" />
-                    <span className="text-slate-700">Connected</span>
-                  </>
-                ) : (
-                  <span className="text-slate-500">Not connected</span>
-                )}
-              </div>
-              <p className="text-xs text-slate-500">
-                Get a message with Approve/Reject buttons the moment an
-                action needs your review.
+          {/* Telegram notifications ----------------------------------------- */}
+          <section className="space-y-2.5 py-5">
+            <h3 className="type-label">Telegram notifications</h3>
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+              <ConnectionStatus connected={!!telegramStatus?.linked} />
+              <p className="type-body text-[12px]">
+                Get a message with Approve/Reject buttons the moment an action
+                needs your review.
               </p>
-              <Button
-                size="sm"
-                variant="secondary"
+              <button
+                type="button"
                 onClick={handleConnectTelegram}
                 disabled={telegramBusy}
-                className="w-full"
+                className={cn(outlineButton, "w-full")}
               >
                 <Send className="size-3.5" />
                 {telegramStatus?.linked ? "Reconnect" : "Connect"}
-              </Button>
+              </button>
             </div>
             {telegramError && (
               <p className="text-xs text-red-600">{telegramError}</p>
             )}
           </section>
 
-          <section className="space-y-3">
-            <h3 className="text-sm font-medium text-slate-900">
-              Change Password
-            </h3>
+          {/* Change password --------------------------------------------------- */}
+          <section className="space-y-2.5 py-5">
+            <h3 className="type-label">Change password</h3>
             <form onSubmit={handleChangePassword} className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="current-password">Current password</Label>
+                <Label htmlFor="current-password" className="type-meta">
+                  Current password
+                </Label>
                 <Input
                   id="current-password"
                   type="password"
@@ -249,7 +277,9 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="new-password">New password</Label>
+                <Label htmlFor="new-password" className="type-meta">
+                  New password
+                </Label>
                 <Input
                   id="new-password"
                   type="password"
@@ -261,7 +291,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="confirm-password">
+                <Label htmlFor="confirm-password" className="type-meta">
                   Confirm new password
                 </Label>
                 <Input
@@ -288,6 +318,18 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                 {passwordBusy ? "Updating…" : "Update password"}
               </Button>
             </form>
+          </section>
+
+          {/* Logout — quiet, final action -------------------------------------- */}
+          <section className="py-5">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={quietDestructiveButton}
+            >
+              <LogOut className="size-3.5" />
+              Log out
+            </button>
           </section>
         </div>
       </DrawerContent>
