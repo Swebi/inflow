@@ -8,6 +8,9 @@ export default defineConfig({
     plugins: [tailwindcss()],
   }),
   manifest: {
+    name: "Inflow",
+    description:
+      "Spot actionable emails in Gmail and turn them into calendar events or tasks — you stay in the loop.",
     permissions: ["tabs", "activeTab", "sidePanel", "storage", "scripting"],
     host_permissions: ["*://mail.google.com/*"],
     action: {

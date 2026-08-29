@@ -214,22 +214,22 @@
 --------------------------------------------------------------------------- */
 @layer components {
   .type-title {
-    @apply font-heading text-[14px] font-semibold leading-snug tracking-[-0.01em] text-slate-900;
+    @apply font-heading text-[15px] font-semibold leading-snug tracking-[-0.01em] text-slate-900;
   }
   .type-item-title {
-    @apply font-heading text-[13px] font-medium leading-snug tracking-[-0.005em] text-slate-900;
+    @apply font-heading text-[14px] font-medium leading-snug tracking-[-0.005em] text-slate-900;
   }
   .type-body {
-    @apply font-sans text-[12.5px] font-normal leading-relaxed text-slate-500;
+    @apply font-sans text-[13.5px] font-normal leading-relaxed text-slate-500;
   }
   .type-label {
-    @apply font-mono text-[11px] font-medium tracking-[0.01em] text-slate-500;
+    @apply font-mono text-[11.5px] font-medium tracking-[0.01em] text-slate-500;
   }
   .type-meta {
-    @apply font-mono text-[11px] font-medium tracking-[-0.01em] text-slate-500;
+    @apply font-mono text-[11.5px] font-medium tracking-[-0.01em] text-slate-500;
   }
   .type-count {
-    @apply font-mono text-[11px] font-normal tabular-nums text-slate-400;
+    @apply font-mono text-[11.5px] font-normal tabular-nums text-slate-400;
   }
 
   /* Category / `kind` marker for a suggestion row (Deadline, Event, Login…).
@@ -238,7 +238,7 @@
      on purpose: every marker in the list looks identical, so the *word* is
      what differentiates, never the color. */
   .kind-tag {
-    @apply inline-flex shrink-0 items-center gap-1 font-mono text-[10.5px] font-medium leading-none tracking-[0.01em] text-slate-500;
+    @apply inline-flex shrink-0 items-center gap-1 font-mono text-[11px] font-medium leading-none tracking-[0.01em] text-slate-500;
   }
   .kind-tag::before {
     content: "";
@@ -246,10 +246,37 @@
   }
 
   /* One card surface, used everywhere a white surface sits on the slate-100
-     page: date card, suggestion cards, event cards, connect banner. Cards
-     lift off the page with a hairline border + a whisper of shadow — not a
-     heavy drop shadow, not a tinted fill. */
+     page: date card, event cards, connect banner. One radius (rounded-xl),
+     one separation technique — a hairline border, no shadow stacked on top.
+     (The review stack is the one place that uses shadow instead of a border,
+     because those cards physically overlap and need depth — see below.) */
   .surface-card {
-    @apply rounded-xl border border-slate-200/80 bg-white shadow-[0_1px_2px_0_rgb(15_23_42/0.04)];
+    @apply rounded-xl border border-slate-200/80 bg-white;
+  }
+
+  /* Scroll-driven card stack for the "Needs review" queue
+     (components/ScrollStack.tsx — a port of reactbits.dev/components/
+     scroll-stack). Its own fixed-height scroll box; the wrapper div sets the
+     height. `overflow-x: clip` contains a card's dismiss fling. */
+  .scroll-stack-scroller {
+    @apply relative h-full w-full overflow-y-auto;
+    overflow-x: clip;
+    /* No `overscroll-behavior: contain` (the reactbits default): this box sits
+       mid-page, so at its ends the wheel must chain out to reach the history
+       tabs below. */
+  }
+  .scroll-stack-inner {
+    /* padding-top ≈ `stackPosition` — keeps the first card tight under the
+       "Needs review" heading. padding-bottom is just enough scroll room for
+       the last card to reach its pin line (no release zone — the deck stays
+       pinned at the end). */
+    padding: 10px 0 11rem;
+  }
+  /* Just a transform host — ScrollStack sets its transform every frame, and
+     the dismiss fling animates the card *inside* it. All the visual styling
+     (border, bg, shadow, --veil wash) lives on PendingActionCard so the thing
+     that flings is the thing you see. */
+  .scroll-stack-card {
+    @apply relative;
   }
 }

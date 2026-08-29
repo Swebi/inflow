@@ -1,133 +1,100 @@
-import { useState } from "react";
-import axios from "axios";
-import { Loader2, X } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState, type MouseEvent } from "react";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  animate,
+} from "motion/react";
+import { X } from "lucide-react";
 import { RecentActionResponse } from "@/types/schema";
 import { formatHumanDate, kindLabel } from "@/utils/event";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { outlineButton, outlineButtonCompact } from "@/lib/styles";
-import calendarIcon from "@/assets/calendar.svg";
-import tasksIcon from "@/assets/tasks.svg";
 
-const actionButton = cn(outlineButton, outlineButtonCompact, "flex-1");
-
-const API_BASE_URL = "http://localhost:8000/api";
-
+/**
+ * One suggestion in the "Needs review" list / stack — display only. Tapping it
+ * opens the detail sheet (PendingReviewModal), where Skip / Task / Calendar
+ * and the swipe gesture live. The small X (top-right) dismisses the item: the
+ * whole card flings off to the right — rotate + fade, same feel as the swipe
+ * card in the sheet — before the reject fires and the cards below slide up.
+ *
+ * Same visual treatment whether it's in the plain list (1–2 items) or the
+ * ScrollStack; the stack wrapper is just a transform host. When stacked, the
+ * ScrollStack drives `--veil` (0–1) and the overlay below paints an opaque
+ * page-colour wash at that strength, so a receded card dims without letting
+ * its text show through the cards in front.
+ */
 interface PendingActionCardProps {
   action: RecentActionResponse;
-  onResolved: () => void;
+  onOpen: () => void;
+  onDismiss?: () => void;
 }
 
-type Busy = "CALENDAR_EVENT" | "TASK" | "reject" | null;
+export function PendingActionCard({
+  action,
+  onOpen,
+  onDismiss,
+}: PendingActionCardProps) {
+  const [removing, setRemoving] = useState(false);
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [0, 340], [0, 10]);
+  const opacity = useTransform(x, [0, 120, 340], [1, 1, 0]);
 
-export function PendingActionCard({ action, onResolved }: PendingActionCardProps) {
-  const { token } = useAuth();
-  const [busy, setBusy] = useState<Busy>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-  const approve = async (destination: "CALENDAR_EVENT" | "TASK") => {
-    setBusy(destination);
-    setError(null);
-    try {
-      await axios.post(
-        `${API_BASE_URL}/actions/${action.id}/approve`,
-        { destination },
-        { headers }
-      );
-      onResolved();
-    } catch (err) {
-      setError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.message || "Failed to approve"
-          : "Failed to approve"
-      );
-      setBusy(null);
-    }
-  };
-
-  const reject = async () => {
-    setBusy("reject");
-    setError(null);
-    try {
-      await axios.post(`${API_BASE_URL}/actions/${action.id}/reject`, {}, { headers });
-      onResolved();
-    } catch (err) {
-      setError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.message || "Failed to reject"
-          : "Failed to reject"
-      );
-      setBusy(null);
-    }
+  const dismiss = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (removing || !onDismiss) return;
+    setRemoving(true);
+    animate(x, 360, { duration: 0.32, ease: [0.4, 0, 1, 1] });
+    window.setTimeout(onDismiss, 300);
   };
 
   return (
-    <div className="surface-card p-card">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h3 className="type-item-title line-clamp-2">{action.title}</h3>
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="type-meta">{formatHumanDate(action.date)}</span>
-            {action.kind && <Badge>{kindLabel(action.kind)}</Badge>}
-          </div>
-          {action.notes && (
-            <p className="type-body mt-1.5 line-clamp-1 text-slate-400">
-              {action.notes}
-            </p>
-          )}
-        </div>
+    <motion.div
+      role="button"
+      tabIndex={removing ? -1 : 0}
+      onClick={() => !removing && onOpen()}
+      onKeyDown={(e) => {
+        if (!removing && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+      style={{ x, rotate, opacity }}
+      className={cn(
+        "relative w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-4 text-left",
+        "shadow-[0_4px_14px_-8px_rgb(15_23_42/0.16)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
+        removing && "pointer-events-none"
+      )}
+    >
+      {onDismiss && (
         <button
           type="button"
-          onClick={reject}
-          disabled={busy !== null}
-          aria-label="Reject"
-          className="flex size-6 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50"
+          aria-label="Dismiss"
+          onClick={dismiss}
+          className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-500"
         >
-          {busy === "reject" ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <X className="size-3.5" />
-          )}
+          <X className="size-4" />
         </button>
-      </div>
+      )}
 
-      {error && (
-        <p className="mt-2.5 rounded-lg bg-red-50 px-3 py-2 text-[12px] text-red-600">
-          {error}
+      <h3 className="type-item-title line-clamp-2 pr-7">{action.title}</h3>
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="type-meta">{formatHumanDate(action.date)}</span>
+        {action.kind && <Badge>{kindLabel(action.kind)}</Badge>}
+      </div>
+      {action.notes && (
+        <p className="type-body mt-1.5 line-clamp-1 text-slate-400">
+          {action.notes}
         </p>
       )}
 
-      <div className="mt-2.5 flex items-center gap-stack">
-        <button
-          type="button"
-          onClick={() => approve("CALENDAR_EVENT")}
-          disabled={busy !== null}
-          className={actionButton}
-        >
-          {busy === "CALENDAR_EVENT" ? (
-            <Loader2 className="size-3 animate-spin" />
-          ) : (
-            <img src={calendarIcon} alt="" className="size-3.5" aria-hidden />
-          )}
-          Calendar
-        </button>
-        <button
-          type="button"
-          onClick={() => approve("TASK")}
-          disabled={busy !== null}
-          className={actionButton}
-        >
-          {busy === "TASK" ? (
-            <Loader2 className="size-3 animate-spin" />
-          ) : (
-            <img src={tasksIcon} alt="" className="size-3.5" aria-hidden />
-          )}
-          Task
-        </button>
-      </div>
-    </div>
+      {/* Opaque recede wash — strength set by ScrollStack via `--veil`. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-xl bg-slate-100"
+        style={{ opacity: "var(--veil, 0)" }}
+      />
+    </motion.div>
   );
 }

@@ -1,11 +1,11 @@
 import Avatar from "boring-avatars";
 import { HeaderProps } from "@/types/schema";
-import { BrandMark } from "@/components/BrandMark";
 
 /**
- * Wordmark, greeting, avatar — nothing else. The avatar is the settings
- * entry point (and the app's one spot of personality); logout lives inside
- * the drawer, never here.
+ * Greeting + avatar, nothing else. The colored avatar is the app's identity
+ * anchor and the settings entry point (logout lives inside the drawer, never
+ * here); the extension already carries its icon in the browser chrome, so no
+ * in-panel wordmark.
  */
 export function Header({
   greeting,
@@ -14,7 +14,6 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className="flex items-center gap-3 px-gutter pb-3 pt-4">
-      <BrandMark className="shrink-0" />
       <p className="type-body min-w-0 flex-1 truncate text-slate-600">
         {greeting}, {userName}
       </p>

@@ -235,27 +235,33 @@ export function Dashboard() {
         userName={user?.name || user?.email || "User"}
         onOpenSettings={() => setSettingsOpen(true)}
       />
-      {/* min-h-0 lets this flex child actually shrink and scroll internally
-          instead of growing to fit content and getting clipped by the root. */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <DateTimeCard
-          currentTime={currentTime}
-          eventsCount={filteredEvents.length}
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-        />
-        {!googleConnected && <GoogleConnectBanner />}
-        <PendingActionsSection
-          actions={pendingActions}
-          onResolved={fetchRecentActions}
-        />
-        <EventsList
-          events={filteredEvents}
-          error={error}
-          extracting={extracting}
-          showSuccess={false}
-          selectedDate={selectedDate}
-        />
+      {/* The date strip + "Needs review" stay pinned up top; the history
+          tabs take whatever height is left and scroll on their own. */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <DateTimeCard
+            currentTime={currentTime}
+            eventsCount={filteredEvents.length}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+          />
+          {!googleConnected && <GoogleConnectBanner />}
+          <PendingActionsSection
+            actions={pendingActions}
+            onResolved={fetchRecentActions}
+          />
+        </div>
+        {/* min-h-0 lets this flex child shrink and scroll internally instead
+            of growing to fit content and getting clipped by the root. */}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <EventsList
+            events={filteredEvents}
+            error={error}
+            extracting={extracting}
+            showSuccess={false}
+            selectedDate={selectedDate}
+          />
+        </div>
       </div>
       <EventEditDrawer
         open={drawerOpen}

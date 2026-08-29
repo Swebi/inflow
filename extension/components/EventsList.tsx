@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { FilterType, EventsListProps } from "@/types/schema";
 import { EventCard } from "./EventCard";
-import { AlertCircle, Calendar, ListTodo, Mail } from "lucide-react";
+import { AlertCircle, Mail } from "lucide-react";
+import calendarIcon from "@/assets/calendar.svg";
+import tasksIcon from "@/assets/tasks.svg";
 import {
   Empty,
   EmptyHeader,
@@ -46,7 +48,7 @@ export function EventsList({
 
   return (
     <div className="px-gutter pb-24">
-      <div className="mb-3 flex items-center gap-1">
+      <div className="sticky top-0 z-10 -mx-gutter mb-2 flex items-center gap-1 bg-slate-100 px-gutter pb-2 pt-2">
         <button
           type="button"
           onClick={() => setActiveFilter("recents")}
@@ -63,7 +65,7 @@ export function EventsList({
             activeFilter === "calendar" ? tabActive : tabIdle
           }`}
         >
-          <Calendar className="size-3.5" aria-hidden />
+          <img src={calendarIcon} alt="" className="size-3.5" aria-hidden />
           Calendar
         </button>
         <button
@@ -71,7 +73,7 @@ export function EventsList({
           onClick={() => setActiveFilter("tasks")}
           className={`${tab} ${activeFilter === "tasks" ? tabActive : tabIdle}`}
         >
-          <ListTodo className="size-3.5" aria-hidden />
+          <img src={tasksIcon} alt="" className="size-3.5" aria-hidden />
           Tasks
         </button>
       </div>
