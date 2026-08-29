@@ -1,23 +1,33 @@
 import { FloatingActionButtonProps } from "@/types/schema";
 
+/**
+ * Scan-this-email CTA. The one filled accent control on the main surface.
+ *
+ * Anchored `absolute` to the Dashboard's `relative` root — NOT `fixed` to
+ * the viewport — so it rides above the scroll container without ever being
+ * measured against the window. The scroll container (`EventsList`) carries
+ * `pb-24` (96px) so the last card always clears this button:
+ * 16px offset + 56px button + ~24px breathing room.
+ */
 export function FloatingActionButton({
   onClick,
   disabled,
   loading,
 }: FloatingActionButtonProps) {
   return (
-    <div className="absolute bottom-4 right-4">
+    <div className="pointer-events-none absolute bottom-4 right-4">
       <button
         onClick={onClick}
         disabled={disabled}
         aria-label="Scan this email"
-        className="w-14 h-14 bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-40 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+        className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg shadow-accent/25 transition-all duration-200 hover:scale-105 hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 disabled:opacity-40 disabled:hover:scale-100"
       >
         {loading ? (
           <svg
-            className="w-6 h-6 text-white animate-spin"
+            className="size-6 animate-spin"
             fill="none"
             viewBox="0 0 24 24"
+            aria-hidden
           >
             <circle
               className="opacity-25"
@@ -35,10 +45,11 @@ export function FloatingActionButton({
           </svg>
         ) : (
           <svg
-            className="w-6 h-6 text-white"
+            className="size-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden
           >
             <path
               strokeLinecap="round"

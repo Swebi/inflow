@@ -2,12 +2,16 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Small neutral tag for a suggestion's `kind` (Deadline, Event, Delivery…).
+ * Category marker for a suggestion's `kind` (Deadline, Event, Login…).
  *
- * Deliberately monochrome: every badge in a list looks the same, so the
+ * A colored dot + mono label ("• Deadline"), not a filled pill — quieter,
+ * smaller, and reads as metadata sitting next to the date rather than a tag
+ * chip. Monochrome by design: every marker in a list looks the same, so the
  * badge differentiates by its *text*, not by color. Color in this app is
- * reserved for "this needs you" (accent) and real success/error states —
- * a category label is neither.
+ * reserved for "this needs you" (accent) and real success/error states — a
+ * category label is neither.
+ *
+ * Visual treatment lives in `.kind-tag` (see assets/tailwind.css).
  */
 export function Badge({
   children,
@@ -16,15 +20,5 @@ export function Badge({
   children: ReactNode;
   className?: string;
 }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-0.5",
-        "font-sans text-[10.5px] font-semibold leading-none tracking-[0.03em] text-slate-500",
-        className
-      )}
-    >
-      {children}
-    </span>
-  );
+  return <span className={cn("kind-tag", className)}>{children}</span>;
 }

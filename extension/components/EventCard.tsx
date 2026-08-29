@@ -20,24 +20,30 @@ function formatTimeDisplay(time: string): string {
   return formatTimeTo12Hour(time);
 }
 
+/**
+ * A resolved item in the Recents / Calendar / Tasks history. Same shape as a
+ * suggestion card but calmer — it's already been dealt with. Title at
+ * list-item weight, a mono metadata line, the real Google product mark for
+ * where it landed.
+ */
 export function EventCard({ event, variant }: EventCardProps) {
-  const isLight = variant === "light";
+  const isDark = variant === "dark";
   const isCalendar = event.source === "google-calendar";
 
   return (
     <div
       className={
-        isLight
-          ? "surface-card p-3 transition-shadow hover:shadow-md"
-          : "rounded-2xl border border-slate-700 bg-slate-800 p-3"
+        isDark
+          ? "rounded-xl border border-slate-700 bg-slate-800 p-card"
+          : "surface-card p-card transition-shadow hover:shadow-md"
       }
     >
       <div className="flex items-start justify-between gap-2">
         <h3
           className={
-            isLight
-              ? "type-item-title line-clamp-2 flex-1"
-              : "flex-1 line-clamp-2 font-heading text-[13px] font-medium leading-snug text-white"
+            isDark
+              ? "line-clamp-2 flex-1 font-heading text-[13px] font-medium leading-snug tracking-[-0.005em] text-white"
+              : "type-item-title line-clamp-2 flex-1"
           }
         >
           {event.title}
@@ -49,20 +55,24 @@ export function EventCard({ event, variant }: EventCardProps) {
         />
       </div>
       <div className="mt-1.5 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-1.5">
+        <div className="flex min-w-0 items-center gap-x-2 gap-y-1">
           <span
-            className={isLight ? "type-meta" : "text-[12px] text-slate-300"}
+            className={
+              isDark
+                ? "font-mono text-[11px] tracking-[-0.01em] text-slate-400"
+                : "type-meta"
+            }
           >
             {formatHumanDate(event.date)}
           </span>
-          {event.kind && isLight && <Badge>{kindLabel(event.kind)}</Badge>}
+          {event.kind && !isDark && <Badge>{kindLabel(event.kind)}</Badge>}
         </div>
         {event.time && (
           <span
             className={
-              isLight
-                ? "type-meta shrink-0"
-                : "shrink-0 text-[12px] text-slate-300"
+              isDark
+                ? "shrink-0 font-mono text-[11px] tracking-[-0.01em] text-slate-400"
+                : "type-meta shrink-0"
             }
           >
             {formatTimeDisplay(event.time)}

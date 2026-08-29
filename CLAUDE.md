@@ -25,6 +25,35 @@ visible pane, not a marketing page:
 - This is a working tool used many times a day. Optimize for fast scanning
   over first-impression polish.
 
+## Full revamp — current direction (supersedes everything below)
+
+After several rounds of incremental component-level patches that didn't
+visibly move the needle, the decision is to redesign the visual layer from
+scratch rather than keep adjusting individual Tailwind classes. Everything
+under "Historical context" below is background on what was tried and why
+it didn't stick — not a punch list to keep working through piecemeal.
+
+The approach: define the design system once — typography, color tokens,
+spacing scale, component styles — then rebuild the UI against it, rather
+than tweaking what's already there. Structure and IA stay the same (Needs
+review / Recents-Calendar-Tasks split, the settings drawer, FAB, avatar);
+the visual execution gets replaced, not nudged.
+
+Still light mode, still the Superhuman/Notion Calendar/Fantastical/Things 3
+register described below — the revamp is about actually building a system
+instead of patching defaults, not about changing the overall direction.
+
+### Typography
+
+No font is currently chosen deliberately — it falls back to a default
+system/Inter-ish stack, which is a large part of why this hasn't felt
+designed. Pick, on purpose:
+
+- **Geist** for headlines and body text.
+- **Geist Mono** for dates, category labels, counts, and other meta/UI
+  chrome text — matching the type-pairing pattern that shows up in every
+  other project referenced under "Signature moves" below.
+
 ## Visual direction for this project
 
 Light mode, intentional and minimal rather than decorative. Closest
@@ -53,7 +82,9 @@ Within that:
   `slate-*` in the same app — pick one and use it everywhere.
 - One icon system. Pick either the custom SVG assets or `lucide-react`, not
   both for equivalent concepts (calendar/task icons vs. lucide icons like
-  `X`, `LogOut`, `RefreshCw`). Mixed icon systems read as unfinished.
+  `X`, `LogOut`, `RefreshCw`). Mixed icon systems read as unfinished. The
+  real Google Calendar/Google Tasks icons are the one deliberate exception —
+  keep those on the Calendar/Task action buttons specifically.
 - Card titles wrap (2-line clamp), never hard-truncate mid-word.
 - Dates render in one consistent human format across every surface (e.g.
   "Sep 24"), not a mix of `dd.MM.yyyy` and locale month/day strings.
@@ -65,7 +96,7 @@ Within that:
 - Prefer wrapping/showing full context (sender, source email) over cropping
   it — the whole value of a suggestion card is _why it was surfaced_.
 
-## Signature moves from other work — what applies here
+## Signature moves from other work
 
 A design-taste profile drawn from other projects (TalentLens, Placement
 Atlas, RoundZero, Ionio, personal portfolio) is saved to memory/Notion.
@@ -75,15 +106,14 @@ light, restrained direction:
 - **Type pairing**: every one of these projects contrasts a headline/body
   face with a monospace face used specifically for labels, meta text,
   numbers, and small UI chrome — never one generic sans doing every job.
-  Apply this to Inflow's type system: body/title in the main sans, but
-  dates, category labels, and counts in a monospace face.
+  This is the basis for the Geist/Geist Mono decision above.
 - **Colored dot + label for status/category**, preferred over a filled
   badge/pill (seen in RoundZero's "• Super Dream", Placement Atlas's
-  "• STATIC ARCHIVE"). Use this instead of a filled badge chip for the
-  `kind` field on pending-action cards.
+  "• STATIC ARCHIVE"). Already applied to the `kind` field on pending-
+  action cards — keep this pattern.
 - **A consistent identity anchor** — logo/wordmark or colored avatar,
   placed identically on every screen. Inflow already has this right
-  (the colored avatar, restored per user request) — keep it exactly as is.
+  (the colored avatar) — keep it exactly as is.
 - **Hairline borders over heavy shadows**, one accent color used only for
   CTAs/active-states/key data, rounded-pill buttons — all already the
   direction established for this project; these projects confirm it's
@@ -96,136 +126,73 @@ light, restrained direction:
   01/02/03 section labels, warm cream backgrounds — those are the more
   editorial/marketing-site register and don't fit a dense utility panel.
 
-The "needs review" cards currently carry too much weight for a list that
-can run 15-20+ items and gets scanned repeatedly. Tighten:
-
-- Title: smaller/lighter than it is now — it's currently competing with
-  the header for boldness. It's a list item, not a headline.
-- Description: 1 line by default, not 2 — most of the value is in the
-  title + date + badge; the description is supporting detail.
-- Buttons: reduce height and padding on Calendar/Task — they're currently
-  the single biggest space cost per card. Consider whether icon + label at
-  a smaller size, or a more compact control, still reads clearly.
-- Card padding: reduce on all sides; make sure the gap _between_ cards is
-  visibly smaller than the padding _inside_ a card, so grouping is legible.
-- Badge labels: normalize to short, consistent text (e.g. "Login",
-  "Deadline", "Event", "Promo") — currently ranges from one word to three
-  and wraps awkwardly at that length.
-
-## Header / logout
-
-Logout should not live in the main header — it's not something the user
-needs "in their face" on every open. Move it into the settings drawer as a
-menu item/button there instead. The header should just be the wordmark,
-greeting, and avatar; tapping the avatar (or a settings icon) opens the
-drawer where logout lives.
-
-## Corrections — two things that got wrongly stripped out
-
-The last two passes over-applied "restraint" to two things that were
-actually working:
-
-- **The avatar.** The original colored (teal-to-pink) avatar was a good
-  personality touch — don't flatten it to a plain gray circle with an
-  initial. Bring it back. The earlier note about it "introducing a color
-  outside the accent system" was about it clashing with an overly-busy
-  card list, not about the avatar itself being wrong — now that cards are
-  calm, a bit of personality in one small, contained spot (the avatar) is
-  good, not noise.
-- **The Google Calendar / Google Tasks icons.** The real Google-brand
-  icons (not generic lucide calendar/list icons) should stay on the
-  Calendar/Task action buttons specifically — they're identifying actual
-  Google products the user is sending data to, so using their real marks
-  there is correct, not inconsistent. "Pick one icon system" still applies
-  to everything else (chrome icons like close/back/refresh/logout) — use
-  lucide-react for those — but the two Google action icons are the
-  exception, not part of that cleanup.
-
-## Why it still reads as a prototype, not a product
-
-Structure and restraint are right now — but restraint alone reads as a UI
-kit default, not a finished product. What's missing is _identity_:
-
-- **No real type system.** Headline and body weight barely differ, no
-  distinct style for metadata/labels vs. content. Give the app 3–4 clear
-  type roles (e.g. headline, body, label/caption, muted) with a deliberate
-  size + weight + color for each, and use them consistently everywhere —
-  not just whatever a default heading tag gives you.
-- **No surface hierarchy.** Page background, header, date card, and every
-  list card are the same white rounded rectangle nested inside each other.
-  Differentiate levels — e.g. page bg is a soft neutral, cards are pure
-  white with a subtle shadow instead of (or in addition to) a border, so
-  there's a visible "surface" distinction between page and content.
-- **Category/kind labels are raw data, not designed elements.** Things like
-  "Release", "Deadline", "Delivery" currently render as plain text after a
-  date. Turn these into small styled badges/tags with their own visual
-  treatment, not concatenated metadata text.
-- **Buttons look like unstyled defaults.** Give Calendar/Task real button
-  states (hover, active/pressed) and tighten them — right now they read as
-  a UI-kit default with no crafted interaction feel.
-- **No brand mark.** There's no wordmark, icon, or signature visual motif
-  anywhere in the panel — nothing makes this recognizably _Inflow_ instead
-  of a generic list-of-cards app. Even something small and consistent (a
-  simple mark next to "Good afternoon," or in place of the puzzle-piece
-  extension icon) helps a lot here.
-- **Content quality undermines trust independent of visuals.** Low-signal
-  items (a game release announcement, a food-delivery confirmation) sitting
-  in "Needs review" next to a genuine deadline make the list feel like an
-  unfiltered extraction dump rather than a curated assistant. This is a
-  product/extraction issue, not a UI one, but it's worth raising because it
-  actively works against the "finished product" feeling — no amount of
-  visual polish fixes a list that includes things nobody asked to review.
-
-## Regressions from the first pass — don't repeat these
-
-The first redesign pass made things louder, not calmer. Specific mistakes
-to avoid:
-
-- **Don't give every card a background color wash.** A tinted fill applied
-  uniformly to every item in a list stops meaning anything — same failure
-  as the original amber borders, just recolored. Cards stay on plain
-  white/neutral with a thin border or none; reserve color for the one or
-  two states that are actually different from the rest.
-- **Don't make one of two equal-weight actions (Calendar/Task) a solid
-  filled button.** They're both just "where does this go," not a
-  primary/secondary pair. A solid black pill repeated down a 20-item list
-  is the loudest thing on the screen. Both should be outlined/ghost,
-  equal weight.
-- **Don't split one line of text into two colors/weights** (e.g. "Good
-  afternoon," muted + "Suhayb" bold black) without a functional reason.
-  Greetings and other low-stakes text stay one consistent treatment.
-- **The FAB overlap bug came back after a "fix."** Verify by scrolling to
-  the actual end of a long list, not just checking the component code —
-  confirm nothing renders under the button at any scroll position.
-
-## Known trouble spots in the current build (as of this pass)
-
-- `DateTimeCard.tsx` — three redundant renderings of "now" (big date block,
-  big clock, day-name/count row) plus a date-picker pill row. Should
-  collapse to one compact row.
-- No real `--accent` is defined in `assets/tailwind.css` (it's set to the
-  same flat gray as `--muted`) — so components reach for ad hoc colors:
-  amber borders (`PendingActionCard`, `EventsList` error banner), blue
-  (`GoogleConnectBanner`, `EventEditDrawer` focus rings, success banner in
-  `EventsList`), near-black slate (buttons, active tab states). Fix at the
-  token level, not per component.
-- `PendingActionCard.tsx` title uses `truncate` — causes mid-word ellipsis
-  on longer titles. Should be `line-clamp-2`.
-- `FloatingActionButton.tsx` uses `fixed bottom-6 right-6` with no
-  scroll-aware spacing below it — it visibly overlaps the last card in a
-  long list.
-- Date formatting is inconsistent: `DateTimeCard` shows "Aug 26" style,
-  `PendingActionCard`/`EventCard` show raw stored `dd.MM.yyyy` strings.
-- `SignIn.tsx` / `SignUp.tsx` / `ProtectedRoute.tsx` use `gray-*` classes
-  while the rest of the app uses `slate-*` — same intended color, two
-  different Tailwind palettes, so they render as (very slightly) different
-  colors than the rest of the app.
-- Auth pages ("Sign In", "Sign Up") and generic drawer copy don't follow
-  sentence case; worth a copy pass alongside the visual one.
-
-## Non-goals for this pass
+## Non-goals
 
 - Don't change the "Needs review" vs. "Recents/Calendar/Tasks" structure —
   that split (pending suggestions vs. resolved history) is correct and
   should stay.
 - Don't add a dark mode toggle for this project right now.
+
+---
+
+## Historical context — what was tried before the full revamp
+
+The notes below record earlier incremental attempts and what went wrong
+with each. Kept for context; superseded by "Full revamp" above.
+
+### Card density (didn't visibly land after two attempts)
+
+- Title was asked to be smaller/lighter — it was competing with the header
+  for boldness.
+- Description should default to 1 line, not 2.
+- Calendar/Task buttons were asked to be shorter (less height/padding) —
+  this was the single biggest space cost per card and never visibly
+  changed across two rounds of "reduce padding"-style requests.
+- Card padding was asked to reduce on all sides, with the gap _between_
+  cards smaller than the padding _inside_ a card.
+- Badge labels were asked to normalize to short, consistent text.
+
+### Why it read as a prototype, not a product
+
+- No real type system — headline and body weight barely differed.
+- No surface hierarchy — page background, header, date card, and every
+  list card were the same white rounded rectangle nested inside each
+  other.
+- Category/kind labels were raw concatenated text before becoming a
+  dot+label pattern.
+- Buttons read as unstyled defaults with no crafted interaction states.
+- No brand mark anywhere in the panel.
+- Content quality (low-signal items like game releases or food-delivery
+  confirmations sitting in "Needs review" next to genuine deadlines)
+  undermines trust independent of any visual work — a product/extraction
+  issue, not UI, but worth remembering since polish alone won't fix it.
+
+### Regressions from the first redesign pass — avoid repeating
+
+- Giving every card a background color wash (a tinted fill applied
+  uniformly stops meaning anything — same failure as the original amber
+  borders, just recolored).
+- Making one of two equal-weight actions (Calendar/Task) a solid filled
+  button — both are just "where does this go," not primary/secondary.
+- Splitting one line of text into two colors/weights without a functional
+  reason (e.g. "Good afternoon," muted + "Suhayb" bold).
+- The FAB overlap bug returning after a claimed fix — verify by actually
+  scrolling to the end of a long list, not just reading the component code.
+
+### Known code-level issues as of the last review
+
+- `DateTimeCard.tsx` previously had three redundant renderings of "now"
+  (big date block, big clock, day-name/count row) plus a date-picker pill
+  row.
+- No real `--accent` was defined in `assets/tailwind.css` (it matched
+  `--muted`), so components reached for ad hoc colors — amber, blue,
+  near-black slate in different places for what should've been one token.
+- `PendingActionCard.tsx` title used `truncate` (mid-word ellipsis) instead
+  of `line-clamp-2`.
+- `FloatingActionButton.tsx` used `fixed bottom-6 right-6` with no
+  scroll-aware spacing, causing it to overlap the last card in long lists.
+- Date formatting was inconsistent — `DateTimeCard` used a friendly format
+  while card components showed raw stored `dd.MM.yyyy` strings.
+- `SignIn.tsx` / `SignUp.tsx` / `ProtectedRoute.tsx` used `gray-*` classes
+  while the rest of the app used `slate-*`.
+- Auth pages and drawer copy didn't consistently follow sentence case.

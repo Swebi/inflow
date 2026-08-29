@@ -209,7 +209,7 @@ export function EventEditDrawer({
             >
               <ArrowLeft className="size-5" />
             </button>
-            <DrawerTitle className="text-lg font-semibold text-slate-900">
+            <DrawerTitle className="type-title text-[15px]">
               {screen === "picker"
                 ? `We found ${initialEvents?.length ?? 0} actions`
                 : "Add task"}
@@ -218,7 +218,7 @@ export function EventEditDrawer({
         </DrawerHeader>
 
         {screen === "picker" ? (
-          <div className="flex-1 overflow-y-auto px-4 py-4">
+          <div className="flex-1 overflow-y-auto px-gutter py-4">
             <div className="space-y-3">
               {(initialEvents ?? []).map((ev, i) => (
                 <button
@@ -238,7 +238,7 @@ export function EventEditDrawer({
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="flex-1 overflow-y-auto px-gutter py-4">
               <form
                 id="event-edit-form"
                 className="flex flex-col gap-4"
@@ -248,7 +248,7 @@ export function EventEditDrawer({
                 }}
               >
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-slate-700">
+                  <Label htmlFor="title" className="type-meta">
                     Title
                   </Label>
                   <Input
@@ -261,7 +261,7 @@ export function EventEditDrawer({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-slate-700">
+                  <Label htmlFor="description" className="type-meta">
                     Description
                   </Label>
                   <Textarea
@@ -275,7 +275,7 @@ export function EventEditDrawer({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="source" className="text-slate-700">
+                  <Label htmlFor="source" className="type-meta">
                     Source
                   </Label>
                   <Select
@@ -305,7 +305,7 @@ export function EventEditDrawer({
 
                 {form.source === "google-tasks" ? (
                   <div className="space-y-2">
-                    <Label className="text-slate-700">Due date</Label>
+                    <Label className="type-meta">Due date</Label>
                     <div className="grid grid-cols-[1fr_auto] gap-3">
                       <DatePicker
                         value={form.dueDate}
@@ -325,7 +325,7 @@ export function EventEditDrawer({
                 ) : (
                   <>
                     <div className="space-y-2">
-                      <Label className="text-slate-700">Start</Label>
+                      <Label className="type-meta">Start</Label>
                       <div className="grid grid-cols-[1fr_auto] gap-3">
                         <DatePicker
                           value={form.startDate}
@@ -345,7 +345,7 @@ export function EventEditDrawer({
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-700">End</Label>
+                      <Label className="type-meta">End</Label>
                       <div className="grid grid-cols-[1fr_auto] gap-3">
                         <DatePicker
                           value={form.endDate}
@@ -366,7 +366,7 @@ export function EventEditDrawer({
                 )}
 
                 {saveError && (
-                  <p className="text-sm text-red-600 rounded-lg bg-red-50 px-3 py-2">
+                  <p className="rounded-lg bg-red-50 px-3 py-2 text-[12px] text-red-600">
                     {saveError}
                   </p>
                 )}

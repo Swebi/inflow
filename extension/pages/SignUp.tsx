@@ -30,13 +30,15 @@ export function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold text-center mb-6">Sign up</h1>
+        <div className="surface-card rounded-2xl p-8">
+          <h1 className="mb-6 text-center font-heading text-xl font-semibold tracking-[-0.01em] text-slate-900">
+            Sign up
+          </h1>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-[12px] text-red-700">
               {error}
             </div>
           )}
@@ -89,11 +91,11 @@ export function SignUp() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-slate-500">
+          <div className="mt-6 text-center text-[12.5px] text-slate-500">
             Already have an account?{" "}
             <Link
               to="/signin"
-              className="text-accent hover:underline font-medium"
+              className="font-medium text-accent hover:underline"
             >
               Sign in
             </Link>

@@ -13,14 +13,12 @@ export function PendingActionsSection({
   if (actions.length === 0) return null;
 
   return (
-    <div className="px-4 pb-2">
-      <h2 className="type-label mb-2">
-        Needs review
-        <span className="ml-1.5 font-normal text-slate-400">
-          ({actions.length})
-        </span>
+    <div className="px-gutter pb-2">
+      <h2 className="mb-2 flex items-baseline gap-1.5">
+        <span className="type-label">Needs review</span>
+        <span className="type-count">({actions.length})</span>
       </h2>
-      <div className="space-y-2">
+      <div className="space-y-stack">
         {actions.map((action) => (
           <PendingActionCard
             key={action.id}

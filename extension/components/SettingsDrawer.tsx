@@ -24,12 +24,12 @@ const API_BASE_URL = "http://localhost:8000/api";
 /** "Connected" / "Not connected" for the Google + Telegram section cards. */
 function ConnectionStatus({ connected }: { connected: boolean }) {
   return connected ? (
-    <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-700">
+    <span className="inline-flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-700">
       <CheckCircle2 className="size-4 shrink-0 text-green-600" />
       Connected
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-400">
+    <span className="inline-flex items-center gap-1.5 font-mono text-[11.5px] font-medium text-slate-400">
       <span className="size-1.5 rounded-full bg-slate-300" aria-hidden />
       Not connected
     </span>
@@ -183,7 +183,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="divide-y divide-slate-200/70 overflow-y-auto px-4 pb-8">
+        <div className="divide-y divide-slate-200/70 overflow-y-auto px-gutter pb-8">
           {/* Account -------------------------------------------------------- */}
           <section className="space-y-2.5 py-5">
             <h3 className="type-label">Account</h3>
@@ -207,7 +207,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           {/* Google connection ------------------------------------------------ */}
           <section className="space-y-2.5 py-5">
             <h3 className="type-label">Google connection</h3>
-            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-card">
               <ConnectionStatus connected={googleConnected} />
               <div className="flex gap-2">
                 {googleConnected && (
@@ -232,13 +232,15 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                 </button>
               </div>
             </div>
-            {googleError && <p className="text-xs text-red-600">{googleError}</p>}
+            {googleError && (
+              <p className="text-[12px] text-red-600">{googleError}</p>
+            )}
           </section>
 
           {/* Telegram notifications ----------------------------------------- */}
           <section className="space-y-2.5 py-5">
             <h3 className="type-label">Telegram notifications</h3>
-            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-card">
               <ConnectionStatus connected={!!telegramStatus?.linked} />
               <p className="type-body text-[12px]">
                 Get a message with Approve/Reject buttons the moment an action
@@ -255,7 +257,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
               </button>
             </div>
             {telegramError && (
-              <p className="text-xs text-red-600">{telegramError}</p>
+              <p className="text-[12px] text-red-600">{telegramError}</p>
             )}
           </section>
 
@@ -306,15 +308,19 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
               </div>
 
               {passwordError && (
-                <p className="text-xs text-red-600">{passwordError}</p>
+                <p className="text-[12px] text-red-600">{passwordError}</p>
               )}
               {passwordSuccess && (
-                <p className="text-xs text-green-600">
+                <p className="text-[12px] text-green-600">
                   Password updated successfully.
                 </p>
               )}
 
-              <Button type="submit" className="w-full" disabled={passwordBusy}>
+              <Button
+                type="submit"
+                className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+                disabled={passwordBusy}
+              >
                 {passwordBusy ? "Updating…" : "Update password"}
               </Button>
             </form>

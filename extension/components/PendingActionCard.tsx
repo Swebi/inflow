@@ -65,16 +65,16 @@ export function PendingActionCard({ action, onResolved }: PendingActionCardProps
   };
 
   return (
-    <div className="surface-card p-3">
+    <div className="surface-card p-card">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <h3 className="type-item-title line-clamp-2">{action.title}</h3>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="type-meta">{formatHumanDate(action.date)}</span>
             {action.kind && <Badge>{kindLabel(action.kind)}</Badge>}
           </div>
           {action.notes && (
-            <p className="type-body mt-1 line-clamp-1 text-slate-400">
+            <p className="type-body mt-1.5 line-clamp-1 text-slate-400">
               {action.notes}
             </p>
           )}
@@ -95,12 +95,12 @@ export function PendingActionCard({ action, onResolved }: PendingActionCardProps
       </div>
 
       {error && (
-        <p className="mt-2.5 rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-600">
+        <p className="mt-2.5 rounded-lg bg-red-50 px-3 py-2 text-[12px] text-red-600">
           {error}
         </p>
       )}
 
-      <div className="mt-2.5 flex items-center gap-2">
+      <div className="mt-2.5 flex items-center gap-stack">
         <button
           type="button"
           onClick={() => approve("CALENDAR_EVENT")}
