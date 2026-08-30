@@ -79,9 +79,9 @@ export function EventsList({
       </div>
 
       {error && !extracting && (
-        <div className="mb-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-red-600" />
-          <p className="text-[12px] leading-relaxed text-red-700">{error}</p>
+        <div className="mb-3 flex items-start gap-2 px-1 py-2">
+          <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
+          <p className="text-[12px] leading-relaxed text-slate-500">{error}</p>
         </div>
       )}
 

@@ -13,8 +13,8 @@ export function Header({
   onOpenSettings,
 }: HeaderProps) {
   return (
-    <header className="flex items-center gap-3 px-gutter pb-3 pt-4">
-      <p className="type-body min-w-0 flex-1 truncate text-slate-600">
+    <header className="flex items-center gap-3 px-gutter pb-3.5 pt-5">
+      <p className="type-body min-w-0 flex-1 truncate text-[14.5px] text-slate-600">
         {greeting}, {userName}
       </p>
       <button
@@ -24,7 +24,7 @@ export function Header({
         aria-label="Settings"
         className="shrink-0 overflow-hidden rounded-full shadow-sm outline-none ring-1 ring-slate-900/5 transition-shadow focus-visible:ring-2 focus-visible:ring-accent/40"
       >
-        <Avatar name={userName} size={28} variant="beam" />
+        <Avatar name={userName} size={32} variant="beam" />
       </button>
     </header>
   );

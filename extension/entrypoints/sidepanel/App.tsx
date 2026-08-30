@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Dashboard } from "@/pages/Dashboard";
+import { Landing } from "@/pages/Landing";
 import { SignIn } from "@/pages/SignIn";
 import { SignUp } from "@/pages/SignUp";
 
@@ -9,6 +10,7 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
+        <Route path="/welcome" element={<Landing />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route

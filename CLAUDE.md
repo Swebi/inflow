@@ -191,6 +191,32 @@ light, restrained direction:
   01/02/03 section labels, warm cream backgrounds — those are the more
   editorial/marketing-site register and don't fit a dense utility panel.
 
+## Landing / sign-in screen
+This is the pre-auth screen (first open, before "Create account"/"Sign in")
+and is a different register from the dense dashboard covered above — it's
+the one moment that's allowed to feel like a small hero/marketing surface,
+not a utility panel. It has a wavy gradient background that everything
+else should work with, not sit on top of as a separate layer.
+- **No card around the headline/CTA area** — those sit directly on the
+  open background, no container.
+- **The footer icon row (Gmail/Calendar/Tasks/Telegram) is a glass card**
+  — translucent with backdrop blur, so the wave shows through at the
+  edges. This is the one place on this screen that keeps the glass
+  treatment; everything above it stays card-free.
+- No "GMAIL SIDE PANEL" eyebrow badge — cut entirely.
+- Primary CTA copy is "Get started". "Sign in" is a plain text link
+  below it with no underline (default or hover — just remove the
+  underline styling).
+- Footer row is icon-only, no text labels: Gmail, Calendar, Tasks,
+  Telegram logos inside the glass card.
+- Final headline/description copy:
+  - Headline: "Never miss what's buried in your inbox."
+  - Description: "Your inbox has a to-do list — Inflow's agent 
+    finds it, drafts the calendar event or task, and waits for your yes
+    before anything goes anywhere."
+- Keep: the wave background itself, Geist/Geist Mono, the single accent
+  color, the "inflow" wordmark + icon mark at the top-left.
+
 ## Non-goals
 - Don't change the "Needs review" vs. "Recents/Calendar/Tasks" structure —
   that split (pending suggestions vs. resolved history) is correct and

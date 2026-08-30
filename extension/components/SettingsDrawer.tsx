@@ -18,6 +18,9 @@ import {
 } from "./ui/drawer";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import calendarIcon from "@/assets/calendar.svg";
+import tasksIcon from "@/assets/tasks.svg";
+import telegramIcon from "@/assets/telegram.svg";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
@@ -176,16 +179,16 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <DrawerHeader className="border-b border-slate-200/70">
+        <DrawerHeader className="border-b border-slate-200/70 px-gutter pb-3 pt-4">
           <DrawerTitle className="type-title text-[15px]">Settings</DrawerTitle>
           <DrawerDescription className="sr-only">
             Manage your account, connections, and password.
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="divide-y divide-slate-200/70 overflow-y-auto px-gutter pb-8">
+        <div className="divide-y divide-slate-200/70 overflow-y-auto px-gutter pb-6">
           {/* Account -------------------------------------------------------- */}
-          <section className="space-y-2.5 py-5">
+          <section className="space-y-2 py-4">
             <h3 className="type-label">Account</h3>
             <div className="flex items-center gap-3">
               <span className="shrink-0 rounded-full border-2 border-white shadow-md">
@@ -205,9 +208,25 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           </section>
 
           {/* Google connection ------------------------------------------------ */}
-          <section className="space-y-2.5 py-5">
-            <h3 className="type-label">Google connection</h3>
-            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-card">
+          <section className="space-y-2 py-4">
+            <div className="flex items-center justify-between">
+              <h3 className="type-label">Google connection</h3>
+              <span className="flex items-center gap-1.5">
+                <img
+                  src={calendarIcon}
+                  alt="Google Calendar"
+                  title="Google Calendar"
+                  className="size-4"
+                />
+                <img
+                  src={tasksIcon}
+                  alt="Google Tasks"
+                  title="Google Tasks"
+                  className="size-4"
+                />
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 p-card">
               <ConnectionStatus connected={googleConnected} />
               <div className="flex gap-2">
                 {googleConnected && (
@@ -238,9 +257,17 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           </section>
 
           {/* Telegram notifications ----------------------------------------- */}
-          <section className="space-y-2.5 py-5">
-            <h3 className="type-label">Telegram notifications</h3>
-            <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-card">
+          <section className="space-y-2 py-4">
+            <div className="flex items-center justify-between">
+              <h3 className="type-label">Telegram notifications</h3>
+              <img
+                src={telegramIcon}
+                alt="Telegram"
+                title="Telegram"
+                className="size-4"
+              />
+            </div>
+            <div className="flex flex-col gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 p-card">
               <ConnectionStatus connected={!!telegramStatus?.linked} />
               <p className="type-body text-[12px]">
                 Get a message with Approve/Reject buttons the moment an action
@@ -262,7 +289,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           </section>
 
           {/* Change password --------------------------------------------------- */}
-          <section className="space-y-2.5 py-5">
+          <section className="space-y-2 py-4">
             <h3 className="type-label">Change password</h3>
             <form onSubmit={handleChangePassword} className="space-y-3">
               <div className="space-y-1.5">
@@ -327,7 +354,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           </section>
 
           {/* Logout — quiet, final action -------------------------------------- */}
-          <section className="py-5">
+          <section className="py-4">
             <button
               type="button"
               onClick={handleLogout}
