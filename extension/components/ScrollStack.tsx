@@ -112,8 +112,15 @@ export function ScrollStack({
     const containerHeight = scroller.clientHeight;
     const stackPositionPx = parseLen(stackPosition, containerHeight);
     const cards = cardsRef.current;
+    // Cosmetic stacking offset caps at maxDepth cards deep — beyond that,
+    // additional cards collapse onto the same staggered position instead of
+    // each pushing the pile further down. Without this cap, a long "Needs
+    // review" queue (10+ items) fans out into a tall accordion of thin,
+    // visually-identical slivers once you've scrolled past `maxDepth` cards,
+    // since scale/veil were already clamped but this offset wasn't.
+    const stackIndexOf = (i: number) => Math.min(i, maxDepth);
     const pinLineOf = (i: number) =>
-      cards[i].offsetTop - stackPositionPx - itemStackDistance * i;
+      cards[i].offsetTop - stackPositionPx - itemStackDistance * stackIndexOf(i);
 
     cards.forEach((card, i) => {
       if (!card) return;
@@ -145,7 +152,7 @@ export function ScrollStack({
       let translateY = 0;
       if (scrollTop >= pinLine) {
         translateY =
-          scrollTop - cardTop + stackPositionPx + itemStackDistance * i;
+          scrollTop - cardTop + stackPositionPx + itemStackDistance * stackIndexOf(i);
       }
 
       const next: Transform = {

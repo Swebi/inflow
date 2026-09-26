@@ -19,12 +19,12 @@ export function Landing() {
 
   return (
     <AuthScene worksWith>
-      <h1 className="font-heading text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-slate-900">
+      <h1 className="select-none font-heading text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] text-slate-900">
         Never miss what's
         <br />
         buried in your inbox.
       </h1>
-      <p className="type-body mt-3 max-w-[36ch] text-slate-600">
+      <p className="type-body mt-3 max-w-[36ch] select-none text-slate-600">
         Your inbox has a to-do list — Inflow's agentic layer finds it, drafts
         the calendar event or task, and waits for your yes before anything goes
         anywhere.
@@ -37,7 +37,7 @@ export function Landing() {
         >
           <Link to="/signup">Get started</Link>
         </Button>
-        <p className="type-meta ml-1 text-slate-500">
+        <p className="type-meta ml-1 select-none text-slate-500">
           Already have an account?{" "}
           <Link
             to="/signin"

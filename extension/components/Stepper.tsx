@@ -70,7 +70,7 @@ export function Stepper({
         e.preventDefault();
         advance();
       }}
-      className="mx-auto w-full max-w-[340px] rounded-2xl border border-white/60 bg-white/70 p-6 shadow-[0_10px_34px_rgba(15,23,42,0.12)] backdrop-blur-xl"
+      className="mx-auto w-full max-w-[340px] rounded-xl border border-white/60 bg-white/70 p-5 shadow-[0_10px_34px_rgba(15,23,42,0.12)] backdrop-blur-xl"
     >
       <div className="flex items-center">
         {steps.map((_, i) => {
@@ -100,7 +100,7 @@ export function Stepper({
 
       <div
         className={cn(
-          "mt-6 flex items-center",
+          "mt-5 flex items-center",
           current === 1 ? "justify-end" : "justify-between"
         )}
       >
@@ -154,13 +154,13 @@ function StepIndicator({
       onClick={onClick}
       aria-current={status === "active" ? "step" : undefined}
       className={cn(
-        "flex size-7 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold transition-colors",
+        "flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors",
         status === "upcoming" && "bg-slate-200 text-slate-500",
         status !== "upcoming" && "bg-accent text-accent-foreground",
         status === "done" ? "cursor-pointer" : "cursor-default"
       )}
     >
-      {status === "done" ? <Check className="size-3.5" /> : step}
+      {status === "done" ? <Check className="size-3" /> : step}
     </button>
   );
 }
@@ -196,7 +196,7 @@ function StepContent({
   const [height, setHeight] = useState<number | "auto">("auto");
   return (
     <motion.div
-      className="relative mt-6 overflow-hidden"
+      className="relative mt-5 overflow-hidden"
       animate={{ height }}
       transition={{ type: "spring", duration: 0.35, bounce: 0.12 }}
     >

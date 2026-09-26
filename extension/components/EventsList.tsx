@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FilterType, EventsListProps } from "@/types/schema";
 import { EventCard } from "./EventCard";
 import { AlertCircle, Mail } from "lucide-react";
@@ -46,8 +46,27 @@ export function EventsList({
     return "Scan an email to extract events and add them here.";
   };
 
+  const isEmpty = filteredEvents.length === 0 && !extracting;
+
+  // The scroll container (our parentElement, owned by Dashboard) has no
+  // reason to be scrollable when there's nothing but the empty state to
+  // show — toggle its overflow off in that case so it can never be dragged
+  // into blank space below "No actions yet". This only runs when isEmpty
+  // flips, not on every layout, so it can't jitter mid-scroll the way a
+  // continuous resize measurement would.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const scrollRoot = rootRef.current?.parentElement;
+    if (!scrollRoot) return;
+    scrollRoot.style.overflowY = isEmpty ? "hidden" : "";
+  }, [isEmpty]);
+
+  // The FAB floats absolute over the scroll container, so it needs ~96px of
+  // bottom clearance to keep the last card from sitting under it.
+  const clearance = isEmpty ? "min-h-full pb-6" : "min-h-full pb-24";
+
   return (
-    <div className="px-gutter pb-24">
+    <div ref={rootRef} className={`box-border px-gutter ${clearance}`}>
       <div className="sticky top-0 z-10 -mx-gutter mb-2 flex items-center gap-1 bg-slate-100 px-gutter pb-2 pt-2">
         <button
           type="button"
@@ -85,17 +104,17 @@ export function EventsList({
         </div>
       )}
 
-      {filteredEvents.length === 0 && !extracting && (
-        <Empty className="border-0 py-8">
+      {isEmpty && (
+        <Empty className="flex-none justify-start gap-0 border-0 p-0 pb-16">
           <EmptyHeader className="gap-0">
             <EmptyMedia
               variant="icon"
-              className="mb-2 size-14 rounded-full bg-slate-100"
+              className="mb-0 size-10 rounded-full bg-slate-100"
             >
-              <Mail className="size-7 text-slate-500" />
+              <Mail className="size-5 text-slate-500" />
             </EmptyMedia>
             <EmptyTitle className="type-title mb-1">No actions yet</EmptyTitle>
-            <EmptyDescription className="type-body max-w-60">
+            <EmptyDescription className="type-body max-w-60 text-[12px] leading-snug">
               {emptyDescription()}
             </EmptyDescription>
           </EmptyHeader>

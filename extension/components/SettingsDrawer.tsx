@@ -7,8 +7,7 @@ import Avatar from "boring-avatars";
 import { useAuth } from "@/contexts/AuthContext";
 import { TelegramLinkResponse } from "@/types/schema";
 import { cn } from "@/lib/utils";
-import { outlineButton, quietDestructiveButton } from "@/lib/styles";
-import { Button } from "./ui/button";
+import { accentButton, outlineButton, quietDestructiveButton } from "@/lib/styles";
 import {
   Drawer,
   DrawerContent,
@@ -18,11 +17,24 @@ import {
 } from "./ui/drawer";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import gmailIcon from "@/assets/gmail.svg";
 import calendarIcon from "@/assets/calendar.svg";
 import tasksIcon from "@/assets/tasks.svg";
 import telegramIcon from "@/assets/telegram.svg";
 
 const API_BASE_URL = "http://localhost:8000/api";
+
+const passwordInputClass = "text-[13px]";
+
+/** Section eyebrow — one step up from the field labels beneath it so the
+ *  header/content hierarchy reads even without a card wrapper. */
+const sectionHeading =
+  "font-mono text-[12px] font-semibold tracking-[-0.01em] text-slate-700";
+
+/** Form-field label — a step quieter than `sectionHeading`. Overrides the
+ *  size/weight/color from `type-meta` (utilities layer beats the component
+ *  layer), keeping only its mono family + tracking. */
+const fieldLabel = "text-[10.5px] font-normal text-slate-400";
 
 /** "Connected" / "Not connected" for the Google + Telegram section cards. */
 function ConnectionStatus({ connected }: { connected: boolean }) {
@@ -189,7 +201,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
         <div className="divide-y divide-slate-200/70 overflow-y-auto px-gutter pb-6">
           {/* Account -------------------------------------------------------- */}
           <section className="space-y-2 py-4">
-            <h3 className="type-label">Account</h3>
+            <h3 className={sectionHeading}>Account</h3>
             <div className="flex items-center gap-3">
               <span className="shrink-0 rounded-full border-2 border-white shadow-md">
                 <Avatar
@@ -210,8 +222,14 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           {/* Google connection ------------------------------------------------ */}
           <section className="space-y-2 py-4">
             <div className="flex items-center justify-between">
-              <h3 className="type-label">Google connection</h3>
+              <h3 className={sectionHeading}>Google connection</h3>
               <span className="flex items-center gap-1.5">
+                <img
+                  src={gmailIcon}
+                  alt="Gmail"
+                  title="Gmail"
+                  className="size-4"
+                />
                 <img
                   src={calendarIcon}
                   alt="Google Calendar"
@@ -259,7 +277,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           {/* Telegram notifications ----------------------------------------- */}
           <section className="space-y-2 py-4">
             <div className="flex items-center justify-between">
-              <h3 className="type-label">Telegram notifications</h3>
+              <h3 className={sectionHeading}>Telegram notifications</h3>
               <img
                 src={telegramIcon}
                 alt="Telegram"
@@ -290,10 +308,10 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
 
           {/* Change password --------------------------------------------------- */}
           <section className="space-y-2 py-4">
-            <h3 className="type-label">Change password</h3>
+            <h3 className={sectionHeading}>Change password</h3>
             <form onSubmit={handleChangePassword} className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="current-password" className="type-meta">
+                <Label htmlFor="current-password" className={cn("type-meta", fieldLabel)}>
                   Current password
                 </Label>
                 <Input
@@ -303,10 +321,11 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
                   disabled={passwordBusy}
+                  className={passwordInputClass}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="new-password" className="type-meta">
+                <Label htmlFor="new-password" className={cn("type-meta", fieldLabel)}>
                   New password
                 </Label>
                 <Input
@@ -317,10 +336,11 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   required
                   minLength={8}
                   disabled={passwordBusy}
+                  className={passwordInputClass}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="confirm-password" className="type-meta">
+                <Label htmlFor="confirm-password" className={cn("type-meta", fieldLabel)}>
                   Confirm new password
                 </Label>
                 <Input
@@ -331,6 +351,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   required
                   minLength={8}
                   disabled={passwordBusy}
+                  className={passwordInputClass}
                 />
               </div>
 
@@ -343,13 +364,13 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                 </p>
               )}
 
-              <Button
+              <button
                 type="submit"
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+                className={cn(accentButton, "w-full")}
                 disabled={passwordBusy}
               >
                 {passwordBusy ? "Updating…" : "Update password"}
-              </Button>
+              </button>
             </form>
           </section>
 

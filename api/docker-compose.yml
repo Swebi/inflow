@@ -1,0 +1,13 @@
+services:
+  redis:
+    container_name: inflow-redis
+    image: redis
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

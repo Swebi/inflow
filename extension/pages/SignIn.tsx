@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputClass =
-  "bg-white/85 border-slate-200 text-slate-900 placeholder:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/25";
+  "bg-white/85 border-slate-200 text-[13px] text-slate-900 placeholder:text-slate-400 focus-visible:border-accent focus-visible:ring-accent/25";
 
 export function SignIn() {
   const { login } = useAuth();
@@ -37,8 +37,8 @@ export function SignIn() {
 
   return (
     <AuthScene>
-      <div className="mb-5 text-center">
-        <h1 className="font-heading text-[22px] font-semibold tracking-[-0.02em] text-slate-900">
+      <div className="mb-4 text-center">
+        <h1 className="font-heading text-[19px] font-semibold tracking-[-0.02em] text-slate-900">
           Welcome back
         </h1>
         <p className="type-meta mt-1 text-slate-500">

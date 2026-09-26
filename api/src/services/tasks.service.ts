@@ -9,7 +9,12 @@ import { CreateTaskData, ListTasksData } from "../types/schema";
 export const handleCreateTask = async (data: CreateTaskData) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(data.userId);
-  const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
+  const tasksClient = getTasksClient(
+    accessToken,
+    refreshToken,
+    expiryDate,
+    data.userId
+  );
 
   const due = data.dueDate ? `${data.dueDate}T00:00:00.000Z` : undefined;
 
@@ -39,7 +44,12 @@ export const handleCreateTask = async (data: CreateTaskData) => {
 export const handleListTasks = async (data: ListTasksData) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(data.userId);
-  const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
+  const tasksClient = getTasksClient(
+    accessToken,
+    refreshToken,
+    expiryDate,
+    data.userId
+  );
 
   const response = await tasksClient.tasks.list({
     tasklist: "@default",
@@ -54,7 +64,12 @@ export const handleListTasks = async (data: ListTasksData) => {
 export const handleGetTask = async (userId: string, taskId: string) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(userId);
-  const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
+  const tasksClient = getTasksClient(
+    accessToken,
+    refreshToken,
+    expiryDate,
+    userId
+  );
 
   const response = await tasksClient.tasks.get({
     tasklist: "@default",
@@ -71,7 +86,12 @@ export const handleUpdateTask = async (
 ) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(userId);
-  const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
+  const tasksClient = getTasksClient(
+    accessToken,
+    refreshToken,
+    expiryDate,
+    userId
+  );
 
   const response = await tasksClient.tasks.patch({
     tasklist: "@default",
@@ -85,7 +105,12 @@ export const handleUpdateTask = async (
 export const handleDeleteTask = async (userId: string, taskId: string) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(userId);
-  const tasksClient = getTasksClient(accessToken, refreshToken, expiryDate);
+  const tasksClient = getTasksClient(
+    accessToken,
+    refreshToken,
+    expiryDate,
+    userId
+  );
 
   await tasksClient.tasks.delete({
     tasklist: "@default",

@@ -17,7 +17,8 @@ export const handleCreateEvent = async (data: CreateEventData) => {
   const calendarClient = getCalendarClient(
     accessToken,
     refreshToken,
-    expiryDate
+    expiryDate,
+    data.userId
   );
 
   const event = generateEvent({
@@ -57,7 +58,8 @@ export const handleListEvents = async (data: ListEventsData) => {
   const calendarClient = getCalendarClient(
     accessToken,
     refreshToken,
-    expiryDate
+    expiryDate,
+    data.userId
   );
 
   const response = await calendarClient.events.list({
@@ -78,7 +80,8 @@ export const handleGetEvent = async (userId: string, eventId: string) => {
   const calendarClient = getCalendarClient(
     accessToken,
     refreshToken,
-    expiryDate
+    expiryDate,
+    userId
   );
 
   const response = await calendarClient.events.get({
@@ -99,7 +102,8 @@ export const handleUpdateEvent = async (
   const calendarClient = getCalendarClient(
     accessToken,
     refreshToken,
-    expiryDate
+    expiryDate,
+    userId
   );
 
   const response = await calendarClient.events.patch({
@@ -117,7 +121,8 @@ export const handleDeleteEvent = async (userId: string, eventId: string) => {
   const calendarClient = getCalendarClient(
     accessToken,
     refreshToken,
-    expiryDate
+    expiryDate,
+    userId
   );
 
   await calendarClient.events.delete({

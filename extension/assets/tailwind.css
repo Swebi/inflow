@@ -264,6 +264,20 @@
     /* No `overscroll-behavior: contain` (the reactbits default): this box sits
        mid-page, so at its ends the wheel must chain out to reach the history
        tabs below. */
+    /* Whatever card falls at the fixed-height boundary gets sliced off
+       mid-line otherwise — fade it into the page background instead of a
+       hard crop. Horizontal edges stay opaque so the dismiss fling isn't
+       clipped early. */
+    mask-image: linear-gradient(
+      to bottom,
+      black calc(100% - 56px),
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black calc(100% - 56px),
+      transparent 100%
+    );
   }
   .scroll-stack-inner {
     /* padding-top ≈ `stackPosition` — keeps the first card tight under the

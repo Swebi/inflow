@@ -46,8 +46,8 @@ export function AuthScene({
               colors={ETHER_COLORS}
               className="absolute inset-0"
               resolution={0.45}
-              mouseForce={14}
-              cursorSize={60}
+              mouseForce={12.5}
+              cursorSize={51}
               autoIntensity={1.4}
               autoSpeed={0.8}
               takeoverDuration={0.3}
@@ -59,18 +59,28 @@ export function AuthScene({
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col px-gutter py-6">
-        <Link to="/welcome" aria-label="Inflow — back to start" className="w-fit">
+        <Link
+          to="/welcome"
+          aria-label="Inflow — back to start"
+          className="w-fit"
+        >
           <BrandMark />
         </Link>
 
-        <div className="flex flex-1 flex-col justify-center py-8">{children}</div>
+        <div className="flex flex-1 flex-col justify-center py-8">
+          {children}
+        </div>
 
         {worksWith && (
           <div className="flex items-center justify-between rounded-2xl border border-white/50 bg-white/55 px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.06)] backdrop-blur-xl">
             <span className="type-meta text-slate-500">Works with</span>
             <span className="flex items-center gap-4">
               <img src={gmailIcon} alt="Gmail" className="size-4" />
-              <img src={calendarIcon} alt="Google Calendar" className="size-4" />
+              <img
+                src={calendarIcon}
+                alt="Google Calendar"
+                className="size-4"
+              />
               <img src={tasksIcon} alt="Google Tasks" className="size-4" />
               <img src={telegramIcon} alt="Telegram" className="size-4" />
             </span>

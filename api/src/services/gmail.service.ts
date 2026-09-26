@@ -27,7 +27,12 @@ function decodeBody(payload: any): string {
 export const handleListNewMessages = async (userId: string) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(userId);
-  const gmailClient = getGmailClient(accessToken, refreshToken, expiryDate);
+  const gmailClient = getGmailClient(
+    accessToken,
+    refreshToken,
+    expiryDate,
+    userId
+  );
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -104,7 +109,12 @@ function getHeader(
 export const handleGetMessage = async (userId: string, messageId: string) => {
   const { accessToken, refreshToken, expiryDate } =
     await handleGetValidGoogleTokens(userId);
-  const gmailClient = getGmailClient(accessToken, refreshToken, expiryDate);
+  const gmailClient = getGmailClient(
+    accessToken,
+    refreshToken,
+    expiryDate,
+    userId
+  );
 
   let response;
   try {

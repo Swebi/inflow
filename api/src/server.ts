@@ -10,7 +10,7 @@ import { agentRouter } from "./routers/agent.router";
 import { telegramRouter } from "./routers/telegram.router";
 import { errorHandler } from "./middlewares/errorHandler";
 import { ensureCheckpointerSetup } from "./agents/email/checkpointer";
-import { startEmailScanJob } from "./jobs/email.job";
+import { initBull, serverAdapter } from "./bull";
 import { bot } from "./services/telegram.service";
 
 import cors from "cors";
@@ -32,6 +32,7 @@ app.use("/api/tasks", tasksRouter);
 app.use("/api/actions", actionsRouter);
 app.use("/api/agent", agentRouter);
 app.use("/api/telegram", telegramRouter);
+app.use("/admin/queues", serverAdapter.getRouter());
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -44,7 +45,7 @@ ensureCheckpointerSetup()
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
-    startEmailScanJob();
+    initBull();
     if (bot) {
       bot.launch();
       console.log("Telegram bot is polling for updates");

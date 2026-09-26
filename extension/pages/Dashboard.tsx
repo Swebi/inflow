@@ -137,22 +137,16 @@ export function Dashboard() {
     return () => browser.runtime.onMessage.removeListener(handleMessage);
   }, [extractEmailFromPage]);
 
-  // Re-extract when the active Gmail tab updates
+  // Re-extract when the active tab finishes updating
   useEffect(() => {
-    const handleTabUpdate = async (
-      tabId: number,
-      changeInfo: any,
-      tab: any
-    ) => {
+    const handleTabUpdate = async (tabId: number, changeInfo: any) => {
       if (changeInfo.url || changeInfo.status === "complete") {
-        if (tab.url?.includes("mail.google.com")) {
-          const [activeTab] = await browser.tabs.query({
-            active: true,
-            currentWindow: true,
-          });
-          if (activeTab.id === tabId) {
-            extractEmailFromPage();
-          }
+        const [activeTab] = await browser.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+        if (activeTab.id === tabId) {
+          extractEmailFromPage();
         }
       }
     };
@@ -160,13 +154,12 @@ export function Dashboard() {
     return () => browser.tabs.onUpdated.removeListener(handleTabUpdate);
   }, [extractEmailFromPage]);
 
-  // Re-extract when the user switches to a Gmail tab
+  // Re-extract (or clear stale state) whenever the user switches tabs,
+  // not just when switching to Gmail — otherwise a leftover error from a
+  // prior Gmail visit stays on screen after navigating away.
   useEffect(() => {
     const handleTabActivated = async (activeInfo: any) => {
-      const tab = await browser.tabs.get(activeInfo.tabId);
-      if (tab.url?.includes("mail.google.com")) {
-        extractEmailFromPage();
-      }
+      extractEmailFromPage();
     };
     browser.tabs.onActivated.addListener(handleTabActivated);
     return () => browser.tabs.onActivated.removeListener(handleTabActivated);
@@ -253,7 +246,7 @@ export function Dashboard() {
         </div>
         {/* min-h-0 lets this flex child shrink and scroll internally instead
             of growing to fit content and getting clipped by the root. */}
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <EventsList
             events={filteredEvents}
             error={error}
